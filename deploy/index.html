@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1120">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Habit Quest">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💎</text></svg>">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Habit Quest</title>
+<style>
+:root{
+  --bg:#0b1120; --bg2:#0f172a; --card:#162033; --card2:#1d2940; --line:#26324d;
+  --text:#e8edf7; --muted:#8a97b3; --dim:#5b6785;
+  --accent:#22c55e; --indigo:#6366f1; --gem:#38bdf8; --fire:#f97316; --gold:#fbbf24; --ice:#7dd3fc; --red:#ef4444;
+  --r:18px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);height:100%}
+body{font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.35;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+input,textarea,select{font:inherit;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:13px 14px;width:100%;outline:none}
+input:focus,textarea:focus{border-color:var(--indigo)}
+.hidden{display:none!important}
+
+/* ---------- shell ---------- */
+#app{max-width:560px;margin:0 auto;min-height:100%;padding:calc(var(--safe-t) + 10px) 16px calc(var(--safe-b) + 110px)}
+.top{display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:20;padding:8px 0 10px;background:linear-gradient(var(--bg) 75%,transparent)}
+.me-chip{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:999px;background:var(--card);border:1px solid var(--line);min-width:0}
+.me-chip b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px}
+.me-chip .chev{color:var(--muted);font-size:12px}
+.pills{margin-left:auto;display:flex;gap:6px}
+.pill{display:flex;align-items:center;gap:4px;padding:7px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}
+.pill .e{font-size:16px;line-height:1}
+.pill.fire.off{filter:grayscale(1);opacity:.7}
+.pill.bump{animation:bump .45s cubic-bezier(.3,1.8,.5,1)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+/* avatar */
+.av{--c:#6366f1;position:relative;display:inline-grid;place-items:center;border-radius:50%;background:var(--c);width:38px;height:38px;font-size:20px;font-weight:800;color:#fff;flex:none}
+.av.lg{width:96px;height:96px;font-size:52px}
+.av.md{width:56px;height:56px;font-size:30px}
+.av.sm{width:30px;height:30px;font-size:16px}
+.av.emo{background:color-mix(in srgb,var(--c) 30%,#1b2540)}
+.av::after{content:"";position:absolute;inset:-4px;border-radius:50%;pointer-events:none}
+.av.f-gold::after{border:3px solid var(--gold);box-shadow:0 0 12px #fbbf2466}
+.av.f-ice::after{border:3px solid var(--ice);box-shadow:0 0 14px #7dd3fc88,inset 0 0 8px #7dd3fc55}
+.av.f-fire::after{border:3px solid #fb923c;animation:fireglow 1.2s ease-in-out infinite alternate}
+@keyframes fireglow{from{box-shadow:0 0 6px #f97316,0 -2px 12px #facc15}to{box-shadow:0 0 16px #ef4444,0 -6px 22px #f97316}}
+.av.f-rainbow::after{inset:-5px;padding:3px;background:conic-gradient(#ef4444,#f59e0b,#84cc16,#06b6d4,#6366f1,#ec4899,#ef4444);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(1turn)}}
+
+/* ---------- tab bar ---------- */
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--safe-b) + 12px);width:min(528px,calc(100% - 24px));z-index:30;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:28px;background:rgba(22,32,51,.82);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid rgba(255,255,255,.07);box-shadow:0 12px 40px rgba(0,0,0,.45)}
+.tabs .ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px)/5);border-radius:22px;background:linear-gradient(180deg,#22c55e33,#22c55e1a);border:1px solid #22c55e44;transition:transform .35s cubic-bezier(.3,1.3,.5,1)}
+.tabs button{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 6px;font-size:11px;font-weight:700;color:var(--muted);transition:color .2s}
+.tabs button svg{width:24px;height:24px;transition:transform .3s cubic-bezier(.3,1.8,.5,1)}
+.tabs button.on{color:#fff}
+.tabs button.on svg{transform:translateY(-1px) scale(1.1);color:var(--accent)}
+.fab{position:fixed;right:max(16px,calc(50% - 264px));bottom:calc(var(--safe-b) + 96px);z-index:25;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#22c55e,#16a34a);display:grid;place-items:center;box-shadow:0 8px 24px #16a34a66;transition:transform .2s}
+.fab:active{transform:scale(.9)}
+.fab svg{width:28px;height:28px;color:#fff}
+
+/* ---------- common ---------- */
+h2{font-size:22px;margin:22px 0 12px;display:flex;align-items:center;gap:8px}
+h2 .count{font-size:13px;background:var(--card2);color:var(--muted);padding:2px 9px;border-radius:999px}
+h2 .right{margin-left:auto;font-size:14px;color:#818cf8;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 18px;border-radius:16px;font-weight:800;background:var(--card2);border:1px solid var(--line);transition:transform .12s}
+.btn:active{transform:scale(.96)}
+.btn.primary{background:linear-gradient(180deg,#6d70f5,#5457e6);border:0;color:#fff;box-shadow:0 5px 0 #3b3eb8}
+.btn.primary:active{transform:translateY(3px);box-shadow:0 2px 0 #3b3eb8}
+.btn.green{background:linear-gradient(180deg,#2bd46a,#1fae54);border:0;color:#fff;box-shadow:0 5px 0 #15803d}
+.btn.green:active{transform:translateY(3px);box-shadow:0 2px 0 #15803d}
+.btn.danger{color:#fca5a5;border-color:#7f1d1d}
+.btn.block{width:100%}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.enter>*{animation:rise .45s cubic-bezier(.2,.9,.3,1.2) both}
+.enter>*:nth-child(2){animation-delay:.04s}.enter>*:nth-child(3){animation-delay:.08s}.enter>*:nth-child(4){animation-delay:.12s}.enter>*:nth-child(5){animation-delay:.16s}.enter>*:nth-child(6){animation-delay:.2s}.enter>*:nth-child(n+7){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+
+/* ---------- today ---------- */
+.date-row{display:flex;align-items:center;gap:14px;margin-top:6px}
+.date-badge{width:64px;height:64px;border-radius:50%;background:var(--accent);display:grid;place-items:center;font-size:28px;font-weight:900;color:#fff;box-shadow:0 6px 20px #22c55e44}
+.date-row .t1{font-size:24px;font-weight:800}
+.week{display:grid;grid-template-columns:repeat(7,1fr);margin:18px 0 4px;border-top:1px solid var(--line);padding-top:12px}
+.week button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0}
+.week .dw{font-size:12px;color:var(--muted);font-weight:700}
+.week .dn{position:relative;width:40px;height:40px;display:grid;place-items:center;border-radius:50%;font-weight:700;font-size:16px}
+.week .dn svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.week button.sel .dn{background:var(--accent);color:#fff}
+.week button.sel .dw{color:var(--accent)}
+.week button.fut{opacity:.4}
+.week .dot{width:6px;height:6px;border-radius:50%;background:transparent}
+.week .dot.on{background:var(--fire)}
+.week .dot.frz{background:var(--ice)}
+
+.progress{margin:14px 0 4px;padding:14px 16px}
+.progress .bar{height:14px;border-radius:999px;background:var(--card2);overflow:hidden;margin-top:10px;position:relative}
+.progress .bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:linear-gradient(90deg,#22c55e,#84cc16);transition:width .6s cubic-bezier(.3,1.3,.5,1)}
+.progress .bar i::after{content:"";position:absolute;left:8px;right:8px;top:3px;height:4px;border-radius:9px;background:rgba(255,255,255,.35)}
+.progress .row{display:flex;justify-content:space-between;align-items:baseline;font-weight:800}
+
+.risk{display:flex;gap:12px;align-items:center;margin-top:12px;padding:12px 14px;border-radius:16px;background:linear-gradient(90deg,#7c2d1233,#f9731622);border:1px solid #f9731655;font-weight:700}
+.risk .e{font-size:26px;animation:wob 1.2s ease-in-out infinite}
+@keyframes wob{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg) scale(1.1)}}
+
+.habit{--c:#22c55e;display:flex;align-items:center;gap:14px;padding:14px 14px 14px 16px;margin-bottom:12px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative;overflow:hidden;transition:background .3s,border-color .3s}
+.habit.done{background:color-mix(in srgb,var(--c) 14%,var(--card));border-color:color-mix(in srgb,var(--c) 45%,var(--line))}
+.habit .ic{font-size:28px;width:44px;height:44px;display:grid;place-items:center;border-radius:14px;background:color-mix(in srgb,var(--c) 18%,transparent);flex:none}
+.habit .nm{font-weight:700;font-size:17px}
+.habit .sub{font-size:13px;color:var(--muted);display:flex;gap:10px;margin-top:2px;flex-wrap:wrap}
+.habit .sub .st{color:var(--fire);font-weight:700}
+.habit .info{flex:1;min-width:0}
+.chk{position:relative;width:62px;height:62px;border-radius:18px;border:2px solid var(--line);display:grid;place-items:center;flex:none;background:var(--bg2);transition:transform .15s,background .25s,border-color .25s}
+.chk:active{transform:scale(.88)}
+.chk svg.tick{width:30px;height:30px;color:var(--dim)}
+.chk svg.tick path{stroke-dasharray:30;stroke-dashoffset:0}
+.habit.done .chk{background:var(--c);border-color:var(--c);box-shadow:0 4px 0 color-mix(in srgb,var(--c) 60%,#000)}
+.habit.done .chk svg.tick{color:#fff}
+.habit.pop .chk{animation:chkpop .5s cubic-bezier(.3,1.8,.5,1)}
+.habit.pop .chk svg.tick path{animation:draw .35s ease-out}
+@keyframes chkpop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes draw{from{stroke-dashoffset:30}to{stroke-dashoffset:0}}
+.habit.pop::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);animation:shine .7s ease-out forwards}
+@keyframes shine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.chk .ring{position:absolute;inset:-2px;transform:rotate(-90deg)}
+.chk .cnt{font-weight:900;font-size:16px;color:var(--muted)}
+.habit.part .chk .cnt{color:#fff}
+.minus{width:30px;height:30px;border-radius:50%;background:var(--card2);display:grid;place-items:center;color:var(--muted);flex:none;font-weight:900}
+.wiggle{animation:wig .4s}
+@keyframes wig{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.empty{text-align:center;padding:30px 16px;color:var(--muted)}
+.empty .big{font-size:52px;margin-bottom:6px}
+
+.chest-card{display:flex;align-items:center;gap:14px;padding:16px;margin:4px 0 14px;border-radius:var(--r);background:linear-gradient(120deg,#78350f,#b45309 50%,#f59e0b);box-shadow:0 8px 28px #f59e0b44;font-weight:800;color:#fff;width:100%;text-align:left;animation:rise .5s both}
+.chest-card .e{font-size:40px;animation:chestbob 1.4s ease-in-out infinite}
+@keyframes chestbob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
+
+/* ---------- habits tab / heatmap ---------- */
+.hcard{margin-bottom:14px;padding:16px;border-radius:var(--r);background:var(--card);border:1px solid var(--line)}
+.hcard .hd{display:flex;align-items:center;gap:10px}
+.hcard .hd .e{font-size:24px}
+.hcard .hd b{font-size:18px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-size:13px;font-weight:700;padding:4px 10px;border-radius:999px;background:#6366f122;color:#a5b4fc}
+.stats{display:flex;gap:16px;margin:12px 0 10px;font-size:15px;color:var(--muted)}
+.stats b{color:var(--text)}
+.grid{display:block;width:100%;height:auto;overflow:visible}
+.grid text{font-size:11px;fill:var(--muted);font-family:inherit}
+.overall .stats{gap:12px;font-size:14px}
+.overall .stats span{white-space:nowrap}
+.legend{display:flex;align-items:center;gap:4px;justify-content:flex-end;font-size:11px;color:var(--muted);margin-top:8px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block}
+.overall{background:linear-gradient(180deg,#0f1b3d,var(--card));border-color:#1e3a8a}
+.overall .stats{margin-top:6px}
+.rbtn{width:40px;height:40px;border-radius:12px;background:var(--card2);display:grid;place-items:center;font-size:14px;color:#cbd5e1;flex:none}
+.rbtn[disabled]{opacity:.25;pointer-events:none}
+.hcard.reo{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;transition:transform .25s cubic-bezier(.3,1.3,.5,1)}
+.hcard.reo .hd{flex:1;min-width:0}
+.hcard.moved{animation:moved .4s ease-out}
+@keyframes moved{0%{box-shadow:0 0 0 2px var(--indigo)}100%{box-shadow:0 0 0 0 transparent}}
+.arch{opacity:.6}
+
+/* ---------- family ---------- */
+.fam{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.fp{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);position:relative;text-align:center}
+.fp.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.fp .ringwrap{position:relative;width:84px;height:84px;display:grid;place-items:center}
+.fp .ringwrap svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.fp .nm{font-weight:800}
+.fp .mini{display:flex;gap:10px;font-size:13px;font-weight:700;color:var(--muted)}
+.fp .crown{position:absolute;top:8px;right:10px;font-size:18px}
+.quest{padding:16px;margin-top:4px;background:linear-gradient(135deg,#312e81,#1e1b4b);border-color:#4338ca}
+.quest .bar{height:16px;border-radius:999px;background:#0b1120aa;overflow:hidden;margin:10px 0 6px;position:relative}
+.quest .bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#a78bfa,#f472b6);border-radius:999px;transition:width .8s}
+.lb{display:flex;flex-direction:column;gap:8px}
+.lb .row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.lb .pos{width:26px;text-align:center;font-weight:900;font-size:18px}
+.lb .b{flex:1;height:10px;border-radius:9px;background:var(--card2);overflow:hidden}
+.lb .b i{display:block;height:100%;border-radius:9px;animation:grow 1s cubic-bezier(.2,.9,.3,1) both}
+@keyframes grow{from{width:0!important}}
+.lb .xp{font-weight:800;min-width:64px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* ---------- shop ---------- */
+.shop-hero{display:flex;align-items:center;gap:14px;padding:18px;background:linear-gradient(135deg,#0c4a6e,#0e7490);border:0}
+.shop-hero .g{font-size:46px;animation:gemfloat 2.4s ease-in-out infinite;filter:drop-shadow(0 6px 12px #38bdf888)}
+@keyframes gemfloat{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-6px) rotate(6deg)}}
+.shop-hero .v{font-size:34px;font-weight:900}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px 10px;border-radius:16px;background:var(--card);border:1px solid var(--line);position:relative;transition:transform .12s}
+.item:active{transform:scale(.95)}
+.item .big{font-size:34px;height:48px;display:grid;place-items:center}
+.item .nm{font-size:13px;font-weight:700;text-align:center}
+.item .pr{font-size:13px;font-weight:800;color:var(--gem)}
+.item.own .pr{color:var(--muted)}
+.item.eq{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--card))}
+.item.eq .pr{color:var(--accent)}
+.item.poor .pr{color:var(--dim)}
+.freeze-card{display:flex;align-items:center;gap:14px}
+.freeze-card .big{font-size:44px}
+
+/* ---------- me ---------- */
+.prof{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:10px;text-align:center}
+.prof .name{font-size:24px;font-weight:900}
+.prof .title{color:var(--muted);font-weight:700}
+.lvl{width:100%;padding:14px 16px}
+.lvl .bar{height:12px;border-radius:9px;background:var(--card2);overflow:hidden;margin-top:8px}
+.lvl .bar i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:9px;transition:width .8s}
+.badges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.bdg{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:14px;background:var(--card);border:1px solid var(--line);text-align:center}
+.bdg .e{font-size:30px;height:40px;display:grid;place-items:center;border-radius:50%;width:48px;height:48px;background:radial-gradient(circle,#fbbf2433,transparent 70%)}
+.bdg .n{font-size:11px;font-weight:700;line-height:1.15}
+.bdg.lock .e{filter:grayscale(1) brightness(.5);background:none}
+.bdg.lock .n{color:var(--dim)}
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:600;width:100%;text-align:left}
+.setrow:last-child{border-bottom:0}
+.switch{width:52px;height:32px;border-radius:999px;background:var(--card2);position:relative;transition:background .2s;flex:none}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.3,1.5,.5,1)}
+.switch.on{background:var(--indigo)}
+.switch.on::after{transform:translateX(20px)}
+
+/* ---------- sheets & modals ---------- */
+.backdrop{position:fixed;inset:0;z-index:50;background:rgba(3,7,18,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fade .25s both}
+@keyframes fade{from{opacity:0}}
+.sheet{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(560px,100%);max-height:92vh;overflow:auto;z-index:51;background:var(--bg2);border-radius:26px 26px 0 0;border:1px solid var(--line);border-bottom:0;padding:10px 16px calc(var(--safe-b) + 20px);animation:sheetup .38s cubic-bezier(.2,.9,.3,1.1) both}
+.sheet.out{animation:sheetdown .25s ease-in both}
+.backdrop.out{animation:fade .25s reverse both}
+@keyframes sheetup{from{transform:translate(-50%,100%)}}
+@keyframes sheetdown{to{transform:translate(-50%,100%)}}
+.sheet .grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:20px;margin:4px 0 14px;text-align:center}
+.lbl{font-weight:700;margin:18px 0 8px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:10px 16px;border-radius:999px;background:var(--card2);border:1px solid var(--line);font-weight:700;color:#cbd5e1;transition:all .15s}
+.chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.days7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.days7 .chip{padding:10px 0;text-align:center}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.sw{width:40px;height:40px;border-radius:50%;background:var(--c);transition:transform .15s}
+.sw.on{box-shadow:0 0 0 3px var(--bg2),0 0 0 5px #fff;transform:scale(1.05)}
+.icons{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;max-height:264px;overflow-y:auto;overscroll-behavior:contain;padding:2px}
+.etabs{display:flex;gap:2px;overflow-x:auto;margin:10px 0 8px;scrollbar-width:none}
+.etabs::-webkit-scrollbar{display:none}
+.etabs button{font-size:21px;padding:6px 8px;border-radius:10px;flex:none;opacity:.55;transition:all .15s}
+.etabs button.on{background:var(--card2);opacity:1}
+.ecat{font-size:12px;font-weight:700;color:var(--muted);margin:0 0 6px 2px}
+.icons .none{grid-column:1/-1;text-align:center;color:var(--muted);font-size:14px;padding:16px 0;background:none}
+.icons button{font-size:24px;aspect-ratio:1;border-radius:12px;display:grid;place-items:center;background:var(--card2)}
+.icons button.on{background:var(--indigo);transform:scale(1.08)}
+.stepper{display:flex;align-items:center;gap:14px}
+.stepper button{width:42px;height:42px;border-radius:12px;background:var(--card2);font-size:22px;font-weight:900}
+.stepper b{min-width:28px;text-align:center;font-size:20px}
+.namerow{display:flex;gap:10px;align-items:center}
+.namerow .bigic{width:54px;height:54px;border-radius:16px;font-size:30px;display:grid;place-items:center;background:var(--card2);flex:none}
+.tpl{display:flex;align-items:center;gap:12px;padding:12px;border-radius:14px;background:var(--card);margin-bottom:8px;width:100%;text-align:left;font-weight:700}
+.tpl .e{font-size:26px}
+.plist{display:flex;flex-direction:column;gap:8px}
+.prow{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:var(--card);border:1px solid var(--line);width:100%;text-align:left}
+.prow.on{border-color:var(--accent)}
+.prow .grow{flex:1}
+.prow b{display:block;font-size:17px}
+
+.modal-wrap{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:24px}
+.modal{position:relative;width:min(380px,100%);border-radius:28px;background:var(--bg2);border:1px solid var(--line);padding:28px 22px 22px;text-align:center;animation:mpop .5s cubic-bezier(.3,1.6,.5,1) both;overflow:hidden}
+.modal.out{animation:mout .2s ease-in both}
+@keyframes mpop{from{transform:scale(.6);opacity:0}}
+@keyframes mout{to{transform:scale(.85);opacity:0}}
+.modal h1{font-size:28px;margin:8px 0 6px;font-weight:900}
+.modal p{color:var(--muted);margin:0 0 18px}
+.modal .hero{font-size:96px;line-height:1.1;position:relative;display:inline-block}
+.rays{position:absolute;left:50%;top:90px;width:520px;height:520px;margin:-260px 0 0 -260px;background:repeating-conic-gradient(from 0deg,rgba(251,191,36,.13) 0 10deg,transparent 10deg 20deg);border-radius:50%;animation:spin 14s linear infinite;pointer-events:none;-webkit-mask:radial-gradient(circle,#000 20%,transparent 65%);mask:radial-gradient(circle,#000 20%,transparent 65%)}
+.flame-big{font-size:110px;display:inline-block;animation:flame 1s ease-in-out infinite alternate;filter:drop-shadow(0 8px 24px #f97316aa)}
+@keyframes flame{from{transform:scale(1) rotate(-3deg)}to{transform:scale(1.08) rotate(3deg)}}
+.streak-num{font-size:64px;font-weight:900;color:var(--fire);line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 4px 24px #f9731666}
+.wk{display:flex;justify-content:center;gap:8px;margin:16px 0 20px}
+.wk div{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--muted)}
+.wk span{width:32px;height:32px;border-radius:50%;background:var(--card2);display:grid;place-items:center;font-size:16px}
+.wk span.on{background:var(--fire);color:#fff;animation:mpop .5s cubic-bezier(.3,1.6,.5,1) both}
+.wk span.fz{background:var(--ice)}
+.reward{display:inline-flex;align-items:center;gap:6px;margin:0 4px 18px;padding:8px 14px;border-radius:999px;background:#38bdf822;color:var(--gem);font-weight:900;font-size:18px}
+.reward.xp{background:#a855f722;color:#c084fc}
+.chest{font-size:110px;display:inline-block;cursor:pointer;animation:chestshake 1.1s ease-in-out infinite}
+@keyframes chestshake{0%,60%,100%{transform:rotate(0)}65%{transform:rotate(-10deg) scale(1.05)}75%{transform:rotate(10deg) scale(1.05)}85%{transform:rotate(-6deg)}95%{transform:rotate(4deg)}}
+.chest.open{animation:chestopen .6s cubic-bezier(.3,1.8,.5,1) both}
+@keyframes chestopen{0%{transform:scale(1)}30%{transform:scale(.8)}100%{transform:scale(1.2)}}
+.lvlnum{font-size:88px;font-weight:900;background:linear-gradient(180deg,#fde68a,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+
+/* who's playing */
+.who{position:fixed;inset:0;z-index:48;background:radial-gradient(ellipse at top,#1e1b4b,var(--bg) 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;animation:fade .3s both}
+.who h1{font-size:30px;font-weight:900;margin:0 0 28px}
+.who .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px 30px;max-width:360px}
+.who button{display:flex;flex-direction:column;align-items:center;gap:10px;font-weight:800;font-size:18px;animation:mpop .5s cubic-bezier(.3,1.6,.5,1) both}
+.who button:active .av{transform:scale(.92)}
+.who .av{width:104px;height:104px;font-size:56px;transition:transform .15s;border-radius:32px}
+.who .av::after{border-radius:36px}
+.who .sub{font-size:13px;color:var(--muted);font-weight:700}
+
+/* toast + fx */
+#toasts{position:fixed;top:calc(var(--safe-t) + 10px);left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:8px;width:min(420px,calc(100% - 24px));pointer-events:none}
+.toast{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:18px;background:rgba(29,41,64,.95);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.4);font-weight:700;animation:tin .45s cubic-bezier(.3,1.5,.5,1) both;position:relative;overflow:hidden}
+.toast.badge{background:linear-gradient(120deg,#422006,#78350f);border-color:#f59e0b}
+.toast.badge::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.25) 50%,transparent 70%);animation:shine 1.2s .3s ease-out both}
+.toast.err{background:#450a0a;border-color:#991b1b}
+.toast .e{font-size:28px}
+.toast.out{animation:tout .3s ease-in both}
+@keyframes tin{from{transform:translateY(-30px) scale(.9);opacity:0}}
+@keyframes tout{to{transform:translateY(-20px);opacity:0}}
+#fx{position:fixed;inset:0;z-index:90;pointer-events:none}
+.fly{position:fixed;z-index:91;pointer-events:none;font-size:22px;will-change:transform}
+.float{position:fixed;z-index:91;pointer-events:none;font-weight:900;font-size:18px;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);animation:floatup 1.1s ease-out forwards;white-space:nowrap}
+@keyframes floatup{0%{transform:translate(-50%,0) scale(.6);opacity:0}15%{transform:translate(-50%,-10px) scale(1.15);opacity:1}100%{transform:translate(-50%,-70px) scale(1);opacity:0}}
+.combo{position:fixed;left:50%;top:38%;z-index:92;transform:translateX(-50%);font-size:40px;font-weight:900;color:var(--gold);text-shadow:0 4px 0 #b45309,0 8px 30px #f59e0b;pointer-events:none;animation:combo .9s cubic-bezier(.3,1.6,.5,1) forwards;white-space:nowrap}
+@keyframes combo{0%{transform:translateX(-50%) scale(.3) rotate(-12deg);opacity:0}30%{transform:translateX(-50%) scale(1.2) rotate(4deg);opacity:1}70%{opacity:1}100%{transform:translateX(-50%) translateY(-40px) scale(1);opacity:0}}
+
+/* auth / loading */
+.center{min-height:80vh;display:flex;flex-direction:column;justify-content:center;gap:14px}
+.logo{font-size:64px;text-align:center;animation:gemfloat 2.4s ease-in-out infinite}
+.brand{text-align:center;font-size:34px;font-weight:900;margin:0;background:linear-gradient(90deg,#4ade80,#38bdf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.spinner{width:44px;height:44px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite;margin:0 auto}
+.err-box{padding:12px 14px;border-radius:14px;background:#450a0a;border:1px solid #991b1b;color:#fecaca;font-size:14px}
+.demo-bar{margin:-4px 0 4px;text-align:center;font-size:11px;font-weight:800;letter-spacing:.08em;background:#a855f733;color:#d8b4fe;padding:4px 0;border-radius:999px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts"></div>
+<canvas id="fx"></canvas>
+<div id="layer"></div>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-today" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/><path d="M8.5 15l2.3 2.3 4.7-4.6"/></symbol>
+  <symbol id="i-habits" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></symbol>
+  <symbol id="i-family" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3.5"/><path d="M2.5 20.5c.6-3.6 3.3-6 6.5-6s5.9 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.4c2.4.2 4.1 2.2 4.5 5.1"/></symbol>
+  <symbol id="i-shop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3l3 6 3-6M12 9v12"/></symbol>
+  <symbol id="i-me" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 16.9l-5.6 2.9 1.1-6.2L3 9.2l6.2-.9z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <defs><filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <symbol id="i-tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+</svg>
+
+<!-- Same pinned, integrity-checked Supabase library The Board uses. The browser
+     refuses the file unless it matches this hash byte for byte. -->
+<script src="https://unpkg.com/@supabase/supabase-js@2.112.3/dist/umd/supabase.js"
+        integrity="sha384-qafw21c/iciq0VXsi9FzkfoQv5I/V0iqE4lSNcKXPnW9/UTJLnv5CcN4FHxVLnKg"
+        crossorigin="anonymous"></script>
+<script>
+(function(){
+"use strict";
+
+// ================= SUPABASE (same project as The Board) =================
+const SUPABASE_URL = 'https://vxdxwqdiaghejfczpyxo.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4ZHh3cWRpYWdoZWpmY3pweXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MDExMjcsImV4cCI6MjEwMTM3NzEyN30.sNdRtRDKblxdt1cH2j_Pz213eoHduek2EUG4wQVRAVo';
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+// ================= small helpers =================
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeColor = c => /^#[0-9a-fA-F]{6}$/.test(c || '') ? c : '#6366f1';
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15; return (c === 'x' ? r : (r & 3 | 8)).toString(16); }));
+const pad = n => String(n).padStart(2, '0');
+const ds = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const today = () => ds(new Date());
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return ds(d); };
+const dow = s => parse(s).getDay();                       // 0 = Sunday
+const weekStart = s => addDays(s, -((dow(s) + 6) % 7));   // Monday
+const localDay = iso => iso ? ds(new Date(iso)) : '2000-01-01';
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = n => Number(n || 0).toLocaleString();
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYNAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const HISTORY_DAYS = 371;   // how far back logs are loaded (a year of heatmap + best streaks)
+
+// ================= game rules =================
+const GEMS_PER_HABIT = 10, XP_PER_HABIT = 20, PERFECT_GEMS = 25, PERFECT_XP = 50, FREEZE_PRICE = 50, MAX_FREEZES = 2;
+const lvlXp = n => 50 * n * (n - 1);        // total XP needed to reach level n (L2=100, L3=300, L5=1000, L10=4500)
+const levelOf = xp => { let n = 1; while (xp >= lvlXp(n + 1)) n++; return n; };
+const TITLES = [[50,'Cosmic 🌌'],[35,'Mythic 🐉'],[25,'Legend 👑'],[20,'Champion 🏆'],[15,'Hero 🦸'],[11,'Adventurer 🧭'],[8,'Explorer 🗺️'],[5,'Sapling 🌳'],[3,'Sprout 🌿'],[1,'Seedling 🌱']];
+const titleOf = lvl => TITLES.find(t => lvl >= t[0])[1];
+const MILESTONES = [[3,15],[7,40],[14,75],[30,150],[50,250],[100,500],[150,600],[200,750],[365,1000]];
+
+const BADGES = [
+  {id:'first',     e:'👣', n:'First Step',     d:'Complete your first habit',  g:5,   t:s => s.checks >= 1},
+  {id:'checks25',  e:'⚡', n:'Getting Going',  d:'Complete 25 habits',         g:25,  t:s => s.checks >= 25},
+  {id:'checks100', e:'💯', n:'Centurion',      d:'Complete 100 habits',        g:100, t:s => s.checks >= 100},
+  {id:'checks500', e:'🤖', n:'Habit Machine',  d:'Complete 500 habits',        g:250, t:s => s.checks >= 500},
+  {id:'streak3',   e:'🔥', n:'Warming Up',     d:'Reach a 3-day streak',       g:15,  t:s => s.streak >= 3},
+  {id:'streak7',   e:'🌶️', n:'On Fire',        d:'Reach a 7-day streak',       g:50,  t:s => s.streak >= 7},
+  {id:'streak30',  e:'🚀', n:'Unstoppable',    d:'Reach a 30-day streak',      g:150, t:s => s.streak >= 30},
+  {id:'streak100', e:'👑', n:'Legendary',      d:'Reach a 100-day streak',     g:500, t:s => s.streak >= 100},
+  {id:'perfect1',  e:'🌟', n:'Perfect Day',    d:'Finish every habit in a day',g:20,  t:s => s.perfect >= 1},
+  {id:'perfect10', e:'💎', n:'Perfectionist',  d:'10 perfect days',            g:100, t:s => s.perfect >= 10},
+  {id:'chest5',    e:'🗝️', n:'Treasure Hunter',d:'Open 5 daily chests',        g:50,  t:s => s.chests >= 5},
+  {id:'collector', e:'🎒', n:'Collector',      d:'Have 5 habits going',        g:25,  t:s => s.habits >= 5},
+  {id:'shopper',   e:'🛍️', n:'Shopper',        d:'Buy something in the shop',  g:10,  t:s => s.buys >= 1},
+  {id:'iced',      e:'🧊', n:'Chill Out',      d:'A streak freeze saved you',  g:20,  t:s => s.freezeUsed >= 1},
+  {id:'early',     e:'🐦', n:'Early Bird',     d:'Finish a habit before 8am',  g:15,  t:s => s.early},
+  {id:'owl',       e:'🦉', n:'Night Owl',      d:'Finish a habit after 9pm',   g:15,  t:s => s.owl},
+  {id:'team',      e:'🤝', n:'Team Player',    d:'Whole family perfect, same day', g:50, t:s => s.team},
+  {id:'level5',    e:'⭐', n:'Rising Star',    d:'Reach level 5',              g:50,  t:s => s.level >= 5},
+  {id:'level10',   e:'🌠', n:'Superstar',      d:'Reach level 10',             g:100, t:s => s.level >= 10},
+];
+
+const SHOP = {
+  avatars: [
+    {id:'a-fox',e:'🦊',p:0},{id:'a-panda',e:'🐼',p:0},{id:'a-frog',e:'🐸',p:0},{id:'a-cat',e:'🐱',p:0},{id:'a-dog',e:'🐶',p:0},{id:'a-bear',e:'🐻',p:0},
+    {id:'a-bee',e:'🐝',p:80},{id:'a-peng',e:'🐧',p:100},{id:'a-fly',e:'🦋',p:100},{id:'a-owl',e:'🦉',p:120},{id:'a-oct',e:'🐙',p:120},{id:'a-lion',e:'🦁',p:150},
+    {id:'a-uni',e:'🦄',p:150},{id:'a-dino',e:'🦖',p:200},{id:'a-whale',e:'🐳',p:200},{id:'a-robot',e:'🤖',p:250},{id:'a-alien',e:'👾',p:250},{id:'a-dragon',e:'🐉',p:300},
+  ],
+  frames: [
+    {id:'none',n:'None',p:0},{id:'ice',n:'Ice',p:150},{id:'gold',n:'Gold',p:200},{id:'fire',n:'Fire',p:300},{id:'rainbow',n:'Rainbow',p:400},
+  ],
+  confetti: [
+    {id:'classic',n:'Classic',e:'🎉',p:0,set:null},
+    {id:'stars',n:'Stars',e:'⭐',p:120,set:['⭐','✨','🌟']},
+    {id:'hearts',n:'Hearts',e:'💖',p:120,set:['💖','💕','💗']},
+    {id:'pizza',n:'Pizza party',e:'🍕',p:150,set:['🍕','🍕','🧀']},
+    {id:'dino',n:'Dinos',e:'🦖',p:150,set:['🦖','🦕','🌋']},
+    {id:'space',n:'Space',e:'🚀',p:200,set:['🚀','🪐','⭐','🛸']},
+    {id:'treasure',n:'Treasure',e:'💰',p:200,set:['💎','💰','🪙']},
+  ],
+};
+
+const ICONS = ['💧','🦷','📚','🏃','🧘','🛏️','🎹','🎸','🥦','🍎','🐶','🧹','✍️','💊','🚿','🧠','☀️','🙏','🎒','⚽','🏀','🚴','😴','📵','🧺','🌱','💪','🎨','🧩','📝','🦶','⭐'];
+// Every emoji Apple ships, grouped and ordered like the iPhone emoji keyboard.
+// Each entry is "emoji|search words". Built from the open emoji-data set (Apple-supported only).
+const EMOJI_CATS = [{"n":"Smileys & Emotion","t":"😀","e":"😀|grinning face\n😃|smiling face with open mouth smiley\n😄|smiling face with open mouth and eyes smile\n😁|grinning face with smiling eyes grin\n😆|smiling face with open mouth and tightly-closed eyes laughing satisfied\n😅|smiling face with open mouth and cold sweat smile\n🤣|rolling on the floor laughing\n😂|face with tears of joy\n🙂|slightly smiling face\n🙃|upside-down face upside down\n🫠|melting face\n😉|winking face wink\n😊|smiling face with eyes blush\n😇|smiling face with halo innocent\n🥰|smiling face with eyes and three hearts 3\n😍|smiling face with heart-shaped eyes heart\n🤩|grinning face with star eyes star-struck\n😘|face throwing a kiss kissing heart\n😗|kissing face\n☺️|white smiling face relaxed\n😚|kissing face with closed eyes\n😙|kissing face with smiling eyes\n🥲|smiling face with tear\n😋|face savouring delicious food yum\n😛|face with stuck-out tongue stuck out\n😜|face with stuck-out tongue and winking eye stuck out\n🤪|grinning face with one large and small eye zany\n😝|face with stuck-out tongue and tightly-closed eyes stuck out closed\n🤑|money-mouth face money mouth\n🤗|hugging face\n🤭|smiling face with eyes and hand covering mouth over\n🫢|face with open eyes and hand over mouth\n🫣|face with peeking eye\n🤫|face with finger covering closed lips shushing\n🤔|thinking face\n🫡|saluting face\n🤐|zipper-mouth face zipper mouth\n🤨|face with one eyebrow raised\n😐|neutral face\n😑|expressionless face\n😶|face without mouth no\n🫥|dotted line face\n😶‍🌫️|face in clouds\n😏|smirking face smirk\n😒|unamused face\n🙄|face with rolling eyes\n😬|grimacing face\n😮‍💨|face exhaling\n🤥|lying face\n🫨|shaking face\n🙂‍↔️|head shaking horizontally\n🙂‍↕️|head shaking vertically\n😌|relieved face\n😔|pensive face\n😪|sleepy face\n🤤|drooling face\n😴|sleeping face\n😷|face with medical mask\n🤒|face with thermometer\n🤕|face with head-bandage head bandage\n🤢|nauseated face\n🤮|face with open mouth vomiting\n🤧|sneezing face\n🥵|overheated face hot\n🥶|freezing face cold\n🥴|face with uneven eyes and wavy mouth woozy\n😵|dizzy face\n😵‍💫|face with spiral eyes\n🤯|shocked face with exploding head\n🤠|face with cowboy hat\n🥳|face with party horn and hat partying\n🥸|disguised face\n😎|smiling face with sunglasses\n🤓|nerd face\n🧐|face with monocle\n😕|confused face\n🫤|face with diagonal mouth\n😟|worried face\n🙁|slightly frowning face\n☹️|frowning face white\n😮|face with open mouth\n😯|hushed face\n😲|astonished face\n😳|flushed face\n🥺|face with pleading eyes\n🥹|face holding back tears\n😦|frowning face with open mouth\n😧|anguished face\n😨|fearful face\n😰|face with open mouth and cold sweat\n😥|disappointed but relieved face\n😢|crying face cry\n😭|loudly crying face sob\n😱|face screaming in fear scream\n😖|confounded face\n😣|persevering face persevere\n😞|disappointed face\n😓|face with cold sweat\n😩|weary face\n😫|tired face\n🥱|yawning face\n😤|face with look of triumph\n😡|pouting face rage\n😠|angry face\n🤬|serious face with symbols covering mouth on\n😈|smiling face with horns imp\n👿|imp\n💀|skull\n☠️|skull and crossbones\n💩|pile of poo hankey poop shit\n🤡|clown face\n👹|japanese ogre\n👺|japanese goblin\n👻|ghost\n👽|extraterrestrial alien\n👾|alien monster space invader\n🤖|robot face\n😺|smiling cat face with open mouth smiley\n😸|grinning cat face with smiling eyes smile\n😹|cat face with tears of joy\n😻|smiling cat face with heart-shaped eyes heart\n😼|cat face with wry smile smirk\n😽|kissing cat face with closed eyes\n🙀|weary cat face scream\n😿|crying cat face\n😾|pouting cat face\n🙈|see-no-evil monkey see no evil\n🙉|hear-no-evil monkey hear no evil\n🙊|speak-no-evil monkey speak no evil\n💌|love letter\n💘|heart with arrow cupid\n💝|heart with ribbon gift\n💖|sparkling heart\n💗|growing heart heartpulse\n💓|beating heart heartbeat\n💞|revolving hearts\n💕|two hearts\n💟|heart decoration\n❣️|heart exclamation heavy mark ornament\n💔|broken heart\n❤️‍🔥|heart on fire\n❤️‍🩹|mending heart\n❤️|heavy black heart\n🩷|pink heart\n🧡|orange heart\n💛|yellow heart\n💚|green heart\n💙|blue heart\n🩵|light blue heart\n💜|purple heart\n🤎|brown heart\n🖤|black heart\n🩶|grey heart\n🤍|white heart\n💋|kiss mark\n💯|hundred points symbol 100\n💢|anger symbol\n💥|collision symbol boom\n💫|dizzy symbol\n💦|splashing sweat symbol drops\n💨|dash symbol\n🕳️|hole\n💬|speech balloon\n👁️‍🗨️|eye in speech bubble eye-in-speech-bubble\n🗨️|left speech bubble\n🗯️|right anger bubble\n💭|thought balloon\n💤|sleeping symbol zzz"},{"n":"People & Body","t":"🧑","e":"👋|waving hand sign wave\n🤚|raised back of hand\n🖐️|hand with fingers splayed raised\n✋|raised hand\n🖖|raised hand with part between middle and ring fingers spock-hand\n🫱|rightwards hand\n🫲|leftwards hand\n🫳|palm down hand\n🫴|palm up hand\n🫷|leftwards pushing hand\n🫸|rightwards pushing hand\n👌|ok hand sign\n🤌|pinched fingers\n🤏|pinching hand\n✌️|victory hand v\n🤞|hand with index and middle fingers crossed\n🫰|hand with index finger and thumb crossed\n🤟|i love you hand sign\n🤘|sign of the horns\n🤙|call me hand\n👈|white left pointing backhand index point\n👉|white right pointing backhand index point\n👆|white up pointing backhand index point 2\n🖕|reversed hand with middle finger extended\n👇|white down pointing backhand index point\n☝️|white up pointing index point\n🫵|index pointing at the viewer\n👍|thumbs up sign +1 thumbsup\n👎|thumbs down sign -1 thumbsdown\n✊|raised fist\n👊|fisted hand sign facepunch punch\n🤛|left-facing fist\n🤜|right-facing fist\n👏|clapping hands sign clap\n🙌|person raising both hands in celebration raised\n🫶|heart hands\n👐|open hands sign\n🤲|palms up together\n🤝|handshake\n🙏|person with folded hands pray\n✍️|writing hand\n💅|nail polish care\n🤳|selfie\n💪|flexed biceps muscle\n🦾|mechanical arm\n🦿|mechanical leg\n🦵|leg\n🦶|foot\n👂|ear\n🦻|ear with hearing aid\n👃|nose\n🧠|brain\n🫀|anatomical heart\n🫁|lungs\n🦷|tooth\n🦴|bone\n👀|eyes\n👁️|eye\n👅|tongue\n👄|mouth lips\n🫦|biting lip\n👶|baby\n🧒|child\n👦|boy\n👧|girl\n🧑|adult\n👱|person with blond hair\n👨|man\n🧔|bearded person\n🧔‍♂️|man: beard man with\n🧔‍♀️|woman: beard woman with\n👨‍🦰|man: red hair haired man\n👨‍🦱|man: curly hair haired man\n👨‍🦳|man: white hair haired man\n👨‍🦲|man: bald man\n👩|woman\n👩‍🦰|woman: red hair haired woman\n🧑‍🦰|person: red hair haired person\n👩‍🦱|woman: curly hair haired woman\n🧑‍🦱|person: curly hair haired person\n👩‍🦳|woman: white hair haired woman\n🧑‍🦳|person: white hair haired person\n👩‍🦲|woman: bald woman\n🧑‍🦲|person: bald person\n👱‍♀️|woman: blond hair blond-haired-woman\n👱‍♂️|man: blond hair blond-haired-man\n🧓|older adult\n👴|older man\n👵|older woman\n🙍|person frowning\n🙍‍♂️|man frowning man-frowning\n🙍‍♀️|woman frowning woman-frowning\n🙎|person with pouting face\n🙎‍♂️|man pouting man-pouting\n🙎‍♀️|woman pouting woman-pouting\n🙅|face with no good gesture\n🙅‍♂️|man gesturing no man-gesturing-no\n🙅‍♀️|woman gesturing no woman-gesturing-no\n🙆|face with ok gesture woman\n🙆‍♂️|man gesturing ok man-gesturing-ok\n🙆‍♀️|woman gesturing ok woman-gesturing-ok\n💁|information desk person\n💁‍♂️|man tipping hand man-tipping-hand\n💁‍♀️|woman tipping hand woman-tipping-hand\n🙋|happy person raising one hand\n🙋‍♂️|man raising hand man-raising-hand\n🙋‍♀️|woman raising hand woman-raising-hand\n🧏|deaf person\n🧏‍♂️|deaf man\n🧏‍♀️|deaf woman\n🙇|person bowing deeply bow\n🙇‍♂️|man bowing man-bowing\n🙇‍♀️|woman bowing woman-bowing\n🤦|face palm\n🤦‍♂️|man facepalming man-facepalming\n🤦‍♀️|woman facepalming woman-facepalming\n🤷|shrug\n🤷‍♂️|man shrugging man-shrugging\n🤷‍♀️|woman shrugging woman-shrugging\n🧑‍⚕️|health worker\n👨‍⚕️|man health worker male-doctor\n👩‍⚕️|woman health worker female-doctor\n🧑‍🎓|student\n👨‍🎓|man student male-student\n👩‍🎓|woman student female-student\n🧑‍🏫|teacher\n👨‍🏫|man teacher male-teacher\n👩‍🏫|woman teacher female-teacher\n🧑‍⚖️|judge\n👨‍⚖️|man judge male-judge\n👩‍⚖️|woman judge female-judge\n🧑‍🌾|farmer\n👨‍🌾|man farmer male-farmer\n👩‍🌾|woman farmer female-farmer\n🧑‍🍳|cook\n👨‍🍳|man cook male-cook\n👩‍🍳|woman cook female-cook\n🧑‍🔧|mechanic\n👨‍🔧|man mechanic male-mechanic\n👩‍🔧|woman mechanic female-mechanic\n🧑‍🏭|factory worker\n👨‍🏭|man factory worker male-factory-worker\n👩‍🏭|woman factory worker female-factory-worker\n🧑‍💼|office worker\n👨‍💼|man office worker male-office-worker\n👩‍💼|woman office worker female-office-worker\n🧑‍🔬|scientist\n👨‍🔬|man scientist male-scientist\n👩‍🔬|woman scientist female-scientist\n🧑‍💻|technologist\n👨‍💻|man technologist male-technologist\n👩‍💻|woman technologist female-technologist\n🧑‍🎤|singer\n👨‍🎤|man singer male-singer\n👩‍🎤|woman singer female-singer\n🧑‍🎨|artist\n👨‍🎨|man artist male-artist\n👩‍🎨|woman artist female-artist\n🧑‍✈️|pilot\n👨‍✈️|man pilot male-pilot\n👩‍✈️|woman pilot female-pilot\n🧑‍🚀|astronaut\n👨‍🚀|man astronaut male-astronaut\n👩‍🚀|woman astronaut female-astronaut\n🧑‍🚒|firefighter\n👨‍🚒|man firefighter male-firefighter\n👩‍🚒|woman firefighter female-firefighter\n👮|police officer cop\n👮‍♂️|man police officer male-police-officer\n👮‍♀️|woman police officer female-police-officer\n🕵️|detective sleuth or spy\n🕵️‍♂️|man detective male-detective\n🕵️‍♀️|woman detective female-detective\n💂|guardsman\n💂‍♂️|man guard male-guard\n💂‍♀️|woman guard female-guard\n🥷|ninja\n👷|construction worker\n👷‍♂️|man construction worker male-construction-worker\n👷‍♀️|woman construction worker female-construction-worker\n🫅|person with crown\n🤴|prince\n👸|princess\n👳|man with turban\n👳‍♂️|man wearing turban man-wearing-turban\n👳‍♀️|woman wearing turban woman-wearing-turban\n👲|man with gua pi mao\n🧕|person with headscarf\n🤵|man in tuxedo person\n🤵‍♂️|man in tuxedo\n🤵‍♀️|woman in tuxedo\n👰|bride with veil\n👰‍♂️|man with veil\n👰‍♀️|woman with veil\n🤰|pregnant woman\n🫃|pregnant man\n🫄|pregnant person\n🤱|breast-feeding\n👩‍🍼|woman feeding baby\n👨‍🍼|man feeding baby\n🧑‍🍼|person feeding baby\n👼|baby angel\n🎅|father christmas santa\n🤶|mother christmas mrs claus\n🧑‍🎄|mx claus\n🦸|superhero\n🦸‍♂️|man superhero male\n🦸‍♀️|woman superhero female\n🦹|supervillain\n🦹‍♂️|man supervillain male\n🦹‍♀️|woman supervillain female\n🧙|mage\n🧙‍♂️|man mage male\n🧙‍♀️|woman mage female\n🧚|fairy\n🧚‍♂️|man fairy male\n🧚‍♀️|woman fairy female\n🧛|vampire\n🧛‍♂️|man vampire male\n🧛‍♀️|woman vampire female\n🧜|merperson\n🧜‍♂️|merman\n🧜‍♀️|mermaid\n🧝|elf\n🧝‍♂️|man elf male\n🧝‍♀️|woman elf female\n🧞|genie\n🧞‍♂️|man genie male\n🧞‍♀️|woman genie female\n🧟|zombie\n🧟‍♂️|man zombie male\n🧟‍♀️|woman zombie female\n🧌|troll\n💆|face massage\n💆‍♂️|man getting massage man-getting-massage\n💆‍♀️|woman getting massage woman-getting-massage\n💇|haircut\n💇‍♂️|man getting haircut man-getting-haircut\n💇‍♀️|woman getting haircut woman-getting-haircut\n🚶|pedestrian walking\n🚶‍♂️|man walking man-walking\n🚶‍♀️|woman walking woman-walking\n🚶‍➡️|person walking facing right\n🚶‍♀️‍➡️|woman walking facing right\n🚶‍♂️‍➡️|man walking facing right\n🧍|standing person\n🧍‍♂️|man standing\n🧍‍♀️|woman standing\n🧎|kneeling person\n🧎‍♂️|man kneeling\n🧎‍♀️|woman kneeling\n🧎‍➡️|person kneeling facing right\n🧎‍♀️‍➡️|woman kneeling facing right\n🧎‍♂️‍➡️|man kneeling facing right\n🧑‍🦯|person with white cane probing\n🧑‍🦯‍➡️|person with white cane facing right\n👨‍🦯|man with white cane probing\n👨‍🦯‍➡️|man with white cane facing right\n👩‍🦯|woman with white cane probing\n👩‍🦯‍➡️|woman with white cane facing right\n🧑‍🦼|person in motorized wheelchair\n🧑‍🦼‍➡️|person in motorized wheelchair facing right\n👨‍🦼|man in motorized wheelchair\n👨‍🦼‍➡️|man in motorized wheelchair facing right\n👩‍🦼|woman in motorized wheelchair\n👩‍🦼‍➡️|woman in motorized wheelchair facing right\n🧑‍🦽|person in manual wheelchair\n🧑‍🦽‍➡️|person in manual wheelchair facing right\n👨‍🦽|man in manual wheelchair\n👨‍🦽‍➡️|man in manual wheelchair facing right\n👩‍🦽|woman in manual wheelchair\n👩‍🦽‍➡️|woman in manual wheelchair facing right\n🏃|runner running\n🏃‍♂️|man running man-running\n🏃‍♀️|woman running woman-running\n🏃‍➡️|person running facing right\n🏃‍♀️‍➡️|woman running facing right\n🏃‍♂️‍➡️|man running facing right\n💃|dancer\n🕺|man dancing\n🕴️|person in suit levitating man business\n👯|woman with bunny ears dancers\n👯‍♂️|men with bunny ears men-with-bunny-ears-partying man-with-bunny-ears-partying\n👯‍♀️|women with bunny ears women-with-bunny-ears-partying woman-with-bunny-ears-partying\n🧖|person in steamy room\n🧖‍♂️|man in steamy room\n🧖‍♀️|woman in steamy room\n🧗|person climbing\n🧗‍♂️|man climbing\n🧗‍♀️|woman climbing\n🤺|fencer\n🏇|horse racing\n⛷️|skier\n🏂|snowboarder\n🏌️|person golfing golfer\n🏌️‍♂️|man golfing man-golfing\n🏌️‍♀️|woman golfing woman-golfing\n🏄|surfer\n🏄‍♂️|man surfing man-surfing\n🏄‍♀️|woman surfing woman-surfing\n🚣|rowboat\n🚣‍♂️|man rowing boat man-rowing-boat\n🚣‍♀️|woman rowing boat woman-rowing-boat\n🏊|swimmer\n🏊‍♂️|man swimming man-swimming\n🏊‍♀️|woman swimming woman-swimming\n⛹️|person bouncing ball with\n⛹️‍♂️|man bouncing ball man-bouncing-ball\n⛹️‍♀️|woman bouncing ball woman-bouncing-ball\n🏋️|person lifting weights weight lifter\n🏋️‍♂️|man lifting weights man-lifting-weights\n🏋️‍♀️|woman lifting weights woman-lifting-weights\n🚴|bicyclist\n🚴‍♂️|man biking man-biking\n🚴‍♀️|woman biking woman-biking\n🚵|mountain bicyclist\n🚵‍♂️|man mountain biking man-mountain-biking\n🚵‍♀️|woman mountain biking woman-mountain-biking\n🤸|person doing cartwheel\n🤸‍♂️|man cartwheeling man-cartwheeling\n🤸‍♀️|woman cartwheeling woman-cartwheeling\n🤼|wrestlers\n🤼‍♂️|men wrestling man-wrestling\n🤼‍♀️|women wrestling woman-wrestling\n🤽|water polo\n🤽‍♂️|man playing water polo man-playing-water-polo\n🤽‍♀️|woman playing water polo woman-playing-water-polo\n🤾|handball\n🤾‍♂️|man playing handball man-playing-handball\n🤾‍♀️|woman playing handball woman-playing-handball\n🤹|juggling\n🤹‍♂️|man juggling man-juggling\n🤹‍♀️|woman juggling woman-juggling\n🧘|person in lotus position\n🧘‍♂️|man in lotus position\n🧘‍♀️|woman in lotus position\n🛀|bath\n🛌|sleeping accommodation\n🧑‍🤝‍🧑|people holding hands\n👭|two women holding hands\n👫|man and woman holding hands couple\n👬|two men holding hands\n💏|kiss couplekiss\n👩‍❤️‍💋‍👨|kiss: woman, man woman-kiss-man\n👨‍❤️‍💋‍👨|kiss: man, man man-kiss-man\n👩‍❤️‍💋‍👩|kiss: woman, woman woman-kiss-woman\n💑|couple with heart\n👩‍❤️‍👨|couple with heart: woman, man woman-heart-man\n👨‍❤️‍👨|couple with heart: man, man man-heart-man\n👩‍❤️‍👩|couple with heart: woman, woman woman-heart-woman\n👨‍👩‍👦|family: man, woman, boy man-woman-boy\n👨‍👩‍👧|family: man, woman, girl man-woman-girl\n👨‍👩‍👧‍👦|family: man, woman, girl, boy man-woman-girl-boy\n👨‍👩‍👦‍👦|family: man, woman, boy, boy man-woman-boy-boy\n👨‍👩‍👧‍👧|family: man, woman, girl, girl man-woman-girl-girl\n👨‍👨‍👦|family: man, boy man-man-boy\n👨‍👨‍👧|family: man, girl man-man-girl\n👨‍👨‍👧‍👦|family: man, girl, boy man-man-girl-boy\n👨‍👨‍👦‍👦|family: man, boy, boy man-man-boy-boy\n👨‍👨‍👧‍👧|family: man, girl, girl man-man-girl-girl\n👩‍👩‍👦|family: woman, boy woman-woman-boy\n👩‍👩‍👧|family: woman, girl woman-woman-girl\n👩‍👩‍👧‍👦|family: woman, girl, boy woman-woman-girl-boy\n👩‍👩‍👦‍👦|family: woman, boy, boy woman-woman-boy-boy\n👩‍👩‍👧‍👧|family: woman, girl, girl woman-woman-girl-girl\n👨‍👦|family: man, boy man-boy\n👨‍👦‍👦|family: man, boy, boy man-boy-boy\n👨‍👧|family: man, girl man-girl\n👨‍👧‍👦|family: man, girl, boy man-girl-boy\n👨‍👧‍👧|family: man, girl, girl man-girl-girl\n👩‍👦|family: woman, boy woman-boy\n👩‍👦‍👦|family: woman, boy, boy woman-boy-boy\n👩‍👧|family: woman, girl woman-girl\n👩‍👧‍👦|family: woman, girl, boy woman-girl-boy\n👩‍👧‍👧|family: woman, girl, girl woman-girl-girl\n🗣️|speaking head in silhouette\n👤|bust in silhouette\n👥|busts in silhouette\n🫂|people hugging\n👪|family\n🧑‍🧑‍🧒|family: adult, child family adult\n🧑‍🧑‍🧒‍🧒|family: adult, child, child family adult\n🧑‍🧒|family: adult, child family adult\n🧑‍🧒‍🧒|family: adult, child, child family adult\n👣|footprints"},{"n":"Animals & Nature","t":"🐶","e":"🐵|monkey face\n🐒|monkey\n🦍|gorilla\n🦧|orangutan\n🐶|dog face\n🐕|dog dog2\n🦮|guide dog\n🐕‍🦺|service dog\n🐩|poodle\n🐺|wolf face\n🦊|fox face\n🦝|raccoon\n🐱|cat face\n🐈|cat cat2\n🐈‍⬛|black cat\n🦁|lion face\n🐯|tiger face\n🐅|tiger tiger2\n🐆|leopard\n🐴|horse face\n🫎|moose\n🫏|donkey\n🐎|horse racehorse\n🦄|unicorn face\n🦓|zebra face\n🦌|deer\n🦬|bison\n🐮|cow face\n🐂|ox\n🐃|water buffalo\n🐄|cow cow2\n🐷|pig face\n🐖|pig pig2\n🐗|boar\n🐽|pig nose\n🐏|ram\n🐑|sheep\n🐐|goat\n🐪|dromedary camel\n🐫|bactrian camel\n🦙|llama\n🦒|giraffe face\n🐘|elephant\n🦣|mammoth\n🦏|rhinoceros\n🦛|hippopotamus\n🐭|mouse face\n🐁|mouse mouse2\n🐀|rat\n🐹|hamster face\n🐰|rabbit face\n🐇|rabbit rabbit2\n🐿️|chipmunk\n🦫|beaver\n🦔|hedgehog\n🦇|bat\n🐻|bear face\n🐻‍❄️|polar bear\n🐨|koala\n🐼|panda face\n🦥|sloth\n🦦|otter\n🦨|skunk\n🦘|kangaroo\n🦡|badger\n🐾|paw prints feet\n🦃|turkey\n🐔|chicken\n🐓|rooster\n🐣|hatching chick\n🐤|baby chick\n🐥|front-facing baby chick hatched\n🐦|bird\n🐧|penguin\n🕊️|dove of peace\n🦅|eagle\n🦆|duck\n🦢|swan\n🦉|owl\n🦤|dodo\n🪶|feather\n🦩|flamingo\n🦚|peacock\n🦜|parrot\n🪽|wing\n🐦‍⬛|black bird\n🪿|goose\n🐦‍🔥|phoenix\n🐸|frog face\n🐊|crocodile\n🐢|turtle\n🦎|lizard\n🐍|snake\n🐲|dragon face\n🐉|dragon\n🦕|sauropod\n🦖|t-rex\n🐳|spouting whale\n🐋|whale whale2\n🐬|dolphin flipper\n🦭|seal\n🐟|fish\n🐠|tropical fish\n🐡|blowfish\n🦈|shark\n🐙|octopus\n🐚|spiral shell\n🪸|coral\n🪼|jellyfish\n🐌|snail\n🦋|butterfly\n🐛|bug\n🐜|ant\n🐝|honeybee bee\n🪲|beetle\n🐞|lady beetle ladybug\n🦗|cricket\n🪳|cockroach\n🕷️|spider\n🕸️|spider web\n🦂|scorpion\n🦟|mosquito\n🪰|fly\n🪱|worm\n🦠|microbe\n💐|bouquet\n🌸|cherry blossom\n💮|white flower\n🪷|lotus\n🏵️|rosette\n🌹|rose\n🥀|wilted flower\n🌺|hibiscus\n🌻|sunflower\n🌼|blossom\n🌷|tulip\n🪻|hyacinth\n🌱|seedling\n🪴|potted plant\n🌲|evergreen tree\n🌳|deciduous tree\n🌴|palm tree\n🌵|cactus\n🌾|ear of rice\n🌿|herb\n☘️|shamrock\n🍀|four leaf clover\n🍁|maple leaf\n🍂|fallen leaf\n🍃|leaf fluttering in wind leaves\n🪹|empty nest\n🪺|nest with eggs\n🍄|mushroom"},{"n":"Food & Drink","t":"🍎","e":"🍇|grapes\n🍈|melon\n🍉|watermelon\n🍊|tangerine\n🍋|lemon\n🍋‍🟩|lime\n🍌|banana\n🍍|pineapple\n🥭|mango\n🍎|red apple\n🍏|green apple\n🍐|pear\n🍑|peach\n🍒|cherries\n🍓|strawberry\n🫐|blueberries\n🥝|kiwifruit\n🍅|tomato\n🫒|olive\n🥥|coconut\n🥑|avocado\n🍆|aubergine eggplant\n🥔|potato\n🥕|carrot\n🌽|ear of maize corn\n🌶️|hot pepper\n🫑|bell pepper\n🥒|cucumber\n🥬|leafy green\n🥦|broccoli\n🧄|garlic\n🧅|onion\n🥜|peanuts\n🫘|beans\n🌰|chestnut\n🫚|ginger root\n🫛|pea pod\n🍄‍🟫|brown mushroom\n🍞|bread\n🥐|croissant\n🥖|baguette bread\n🫓|flatbread\n🥨|pretzel\n🥯|bagel\n🥞|pancakes\n🧇|waffle\n🧀|cheese wedge\n🍖|meat on bone\n🍗|poultry leg\n🥩|cut of meat\n🥓|bacon\n🍔|hamburger\n🍟|french fries\n🍕|slice of pizza\n🌭|hot dog hotdog\n🥪|sandwich\n🌮|taco\n🌯|burrito\n🫔|tamale\n🥙|stuffed flatbread\n🧆|falafel\n🥚|egg\n🍳|cooking fried egg\n🥘|shallow pan of food\n🍲|pot of food stew\n🫕|fondue\n🥣|bowl with spoon\n🥗|green salad\n🍿|popcorn\n🧈|butter\n🧂|salt shaker\n🥫|canned food\n🍱|bento box\n🍘|rice cracker\n🍙|rice ball\n🍚|cooked rice\n🍛|curry and rice\n🍜|steaming bowl ramen\n🍝|spaghetti\n🍠|roasted sweet potato\n🍢|oden\n🍣|sushi\n🍤|fried shrimp\n🍥|fish cake with swirl design\n🥮|moon cake\n🍡|dango\n🥟|dumpling\n🥠|fortune cookie\n🥡|takeout box\n🦀|crab\n🦞|lobster\n🦐|shrimp\n🦑|squid\n🦪|oyster\n🍦|soft ice cream icecream\n🍧|shaved ice\n🍨|ice cream\n🍩|doughnut\n🍪|cookie\n🎂|birthday cake\n🍰|shortcake cake\n🧁|cupcake\n🥧|pie\n🍫|chocolate bar\n🍬|candy\n🍭|lollipop\n🍮|custard\n🍯|honey pot\n🍼|baby bottle\n🥛|glass of milk\n☕|hot beverage coffee\n🫖|teapot\n🍵|teacup without handle tea\n🍶|sake bottle and cup\n🍾|bottle with popping cork champagne\n🍷|wine glass\n🍸|cocktail glass\n🍹|tropical drink\n🍺|beer mug\n🍻|clinking beer mugs beers\n🥂|clinking glasses\n🥃|tumbler glass\n🫗|pouring liquid\n🥤|cup with straw\n🧋|bubble tea\n🧃|beverage box\n🧉|mate drink\n🧊|ice cube\n🥢|chopsticks\n🍽️|fork and knife with plate\n🍴|fork and knife\n🥄|spoon\n🔪|hocho knife\n🫙|jar\n🏺|amphora"},{"n":"Activities","t":"⚽","e":"🎃|jack-o-lantern jack o lantern\n🎄|christmas tree\n🎆|fireworks\n🎇|firework sparkler\n🧨|firecracker\n✨|sparkles\n🎈|balloon\n🎉|party popper tada\n🎊|confetti ball\n🎋|tanabata tree\n🎍|pine decoration bamboo\n🎎|japanese dolls\n🎏|carp streamer flags\n🎐|wind chime\n🎑|moon viewing ceremony rice scene\n🧧|red gift envelope\n🎀|ribbon\n🎁|wrapped present gift\n🎗️|reminder ribbon\n🎟️|admission tickets\n🎫|ticket\n🎖️|military medal\n🏆|trophy\n🏅|sports medal\n🥇|first place medal\n🥈|second place medal\n🥉|third place medal\n⚽|soccer ball\n⚾|baseball\n🥎|softball\n🏀|basketball and hoop\n🏐|volleyball\n🏈|american football\n🏉|rugby football\n🎾|tennis racquet and ball\n🥏|flying disc\n🎳|bowling\n🏏|cricket bat and ball\n🏑|field hockey stick and ball\n🏒|ice hockey stick and puck\n🥍|lacrosse stick and ball\n🏓|table tennis paddle and ball\n🏸|badminton racquet and shuttlecock\n🥊|boxing glove\n🥋|martial arts uniform\n🥅|goal net\n⛳|flag in hole golf\n⛸️|ice skate\n🎣|fishing pole and fish\n🤿|diving mask\n🎽|running shirt with sash\n🎿|ski and boot\n🛷|sled\n🥌|curling stone\n🎯|direct hit dart\n🪀|yo-yo\n🪁|kite\n🔫|pistol gun\n🎱|billiards 8ball\n🔮|crystal ball\n🪄|magic wand\n🎮|video game\n🕹️|joystick\n🎰|slot machine\n🎲|game die\n🧩|jigsaw puzzle piece\n🧸|teddy bear\n🪅|pinata\n🪩|mirror ball\n🪆|nesting dolls\n♠️|black spade suit spades\n♥️|black heart suit hearts\n♦️|black diamond suit diamonds\n♣️|black club suit clubs\n♟️|chess pawn\n🃏|playing card black joker\n🀄|mahjong tile red dragon\n🎴|flower playing cards\n🎭|performing arts\n🖼️|framed picture frame with\n🎨|artist palette art\n🧵|spool of thread\n🪡|sewing needle\n🧶|ball of yarn\n🪢|knot"},{"n":"Travel & Places","t":"✈️","e":"🌍|earth globe europe-africa africa\n🌎|earth globe americas\n🌏|earth globe asia-australia asia\n🌐|globe with meridians\n🗺️|world map\n🗾|silhouette of japan\n🧭|compass\n🏔️|snow-capped mountain snow capped\n⛰️|mountain\n🌋|volcano\n🗻|mount fuji\n🏕️|camping\n🏖️|beach with umbrella\n🏜️|desert\n🏝️|desert island\n🏞️|national park\n🏟️|stadium\n🏛️|classical building\n🏗️|building construction\n🧱|brick bricks\n🪨|rock\n🪵|wood\n🛖|hut\n🏘️|houses house buildings\n🏚️|derelict house building\n🏠|house building\n🏡|house with garden\n🏢|office building\n🏣|japanese post office\n🏤|european post office\n🏥|hospital\n🏦|bank\n🏨|hotel\n🏩|love hotel\n🏪|convenience store\n🏫|school\n🏬|department store\n🏭|factory\n🏯|japanese castle\n🏰|european castle\n💒|wedding\n🗼|tokyo tower\n🗽|statue of liberty\n⛪|church\n🕌|mosque\n🛕|hindu temple\n🕍|synagogue\n⛩️|shinto shrine\n🕋|kaaba\n⛲|fountain\n⛺|tent\n🌁|foggy\n🌃|night with stars\n🏙️|cityscape\n🌄|sunrise over mountains\n🌅|sunrise\n🌆|cityscape at dusk city sunset\n🌇|sunset over buildings city sunrise\n🌉|bridge at night\n♨️|hot springs hotsprings\n🎠|carousel horse\n🛝|playground slide\n🎡|ferris wheel\n🎢|roller coaster\n💈|barber pole\n🎪|circus tent\n🚂|steam locomotive\n🚃|railway car\n🚄|high-speed train bullettrain side\n🚅|high-speed train with bullet nose bullettrain front\n🚆|train train2\n🚇|metro\n🚈|light rail\n🚉|station\n🚊|tram\n🚝|monorail\n🚞|mountain railway\n🚋|tram car train\n🚌|bus\n🚍|oncoming bus\n🚎|trolleybus\n🚐|minibus\n🚑|ambulance\n🚒|fire engine\n🚓|police car\n🚔|oncoming police car\n🚕|taxi\n🚖|oncoming taxi\n🚗|automobile car red\n🚘|oncoming automobile\n🚙|recreational vehicle blue car\n🛻|pickup truck\n🚚|delivery truck\n🚛|articulated lorry\n🚜|tractor\n🏎️|racing car\n🏍️|motorcycle racing\n🛵|motor scooter\n🦽|manual wheelchair\n🦼|motorized wheelchair\n🛺|auto rickshaw\n🚲|bicycle bike\n🛴|scooter\n🛹|skateboard\n🛼|roller skate\n🚏|bus stop busstop\n🛣️|motorway\n🛤️|railway track\n🛢️|oil drum\n⛽|fuel pump fuelpump\n🛞|wheel\n🚨|police cars revolving light rotating\n🚥|horizontal traffic light\n🚦|vertical traffic light\n🛑|octagonal sign\n🚧|construction sign\n⚓|anchor\n🛟|ring buoy\n⛵|sailboat boat\n🛶|canoe\n🚤|speedboat\n🛳️|passenger ship\n⛴️|ferry\n🛥️|motor boat\n🚢|ship\n✈️|airplane\n🛩️|small airplane\n🛫|airplane departure\n🛬|airplane arriving\n🪂|parachute\n💺|seat\n🚁|helicopter\n🚟|suspension railway\n🚠|mountain cableway\n🚡|aerial tramway\n🛰️|satellite\n🚀|rocket\n🛸|flying saucer\n🛎️|bellhop bell\n🧳|luggage\n⌛|hourglass\n⏳|hourglass with flowing sand\n⌚|watch\n⏰|alarm clock\n⏱️|stopwatch\n⏲️|timer clock\n🕰️|mantelpiece clock\n🕛|clock face twelve oclock clock12\n🕧|clock face twelve-thirty clock1230\n🕐|clock face one oclock clock1\n🕜|clock face one-thirty clock130\n🕑|clock face two oclock clock2\n🕝|clock face two-thirty clock230\n🕒|clock face three oclock clock3\n🕞|clock face three-thirty clock330\n🕓|clock face four oclock clock4\n🕟|clock face four-thirty clock430\n🕔|clock face five oclock clock5\n🕠|clock face five-thirty clock530\n🕕|clock face six oclock clock6\n🕡|clock face six-thirty clock630\n🕖|clock face seven oclock clock7\n🕢|clock face seven-thirty clock730\n🕗|clock face eight oclock clock8\n🕣|clock face eight-thirty clock830\n🕘|clock face nine oclock clock9\n🕤|clock face nine-thirty clock930\n🕙|clock face ten oclock clock10\n🕥|clock face ten-thirty clock1030\n🕚|clock face eleven oclock clock11\n🕦|clock face eleven-thirty clock1130\n🌑|new moon symbol\n🌒|waxing crescent moon symbol\n🌓|first quarter moon symbol\n🌔|waxing gibbous moon symbol\n🌕|full moon symbol\n🌖|waning gibbous moon symbol\n🌗|last quarter moon symbol\n🌘|waning crescent moon symbol\n🌙|crescent moon\n🌚|new moon with face\n🌛|first quarter moon with face\n🌜|last quarter moon with face\n🌡️|thermometer\n☀️|black sun with rays sunny\n🌝|full moon with face\n🌞|sun with face\n🪐|ringed planet\n⭐|white medium star\n🌟|glowing star star2\n🌠|shooting star stars\n🌌|milky way\n☁️|cloud\n⛅|sun behind cloud partly sunny\n⛈️|cloud with lightning and rain thunder\n🌤️|sun behind small cloud mostly sunny\n🌥️|sun behind large cloud barely sunny\n🌦️|sun behind rain cloud partly sunny\n🌧️|cloud with rain\n🌨️|cloud with snow\n🌩️|cloud with lightning\n🌪️|tornado cloud\n🌫️|fog\n🌬️|wind face blowing\n🌀|cyclone\n🌈|rainbow\n🌂|closed umbrella\n☂️|umbrella\n☔|umbrella with rain drops\n⛱️|umbrella on ground\n⚡|high voltage sign zap\n❄️|snowflake\n☃️|snowman\n⛄|snowman without snow\n☄️|comet\n🔥|fire\n💧|droplet\n🌊|water wave ocean"},{"n":"Objects","t":"💡","e":"👓|eyeglasses\n🕶️|sunglasses dark\n🥽|goggles\n🥼|lab coat\n🦺|safety vest\n👔|necktie\n👕|t-shirt shirt tshirt\n👖|jeans\n🧣|scarf\n🧤|gloves\n🧥|coat\n🧦|socks\n👗|dress\n👘|kimono\n🥻|sari\n🩱|one-piece swimsuit\n🩲|briefs\n🩳|shorts\n👙|bikini\n👚|womans clothes\n🪭|folding hand fan\n👛|purse\n👜|handbag\n👝|pouch\n🛍️|shopping bags\n🎒|school satchel\n🩴|thong sandal\n👞|mans shoe\n👟|athletic shoe\n🥾|hiking boot\n🥿|flat shoe womans\n👠|high-heeled shoe high heel\n👡|womans sandal\n🩰|ballet shoes\n👢|womans boots boot\n🪮|hair pick\n👑|crown\n👒|womans hat\n🎩|top hat tophat\n🎓|graduation cap mortar board\n🧢|billed cap\n🪖|military helmet\n⛑️|rescue worker’s helmet with white cross\n📿|prayer beads\n💄|lipstick\n💍|ring\n💎|gem stone\n🔇|speaker with cancellation stroke mute\n🔈|speaker\n🔉|speaker with one sound wave\n🔊|speaker with three sound waves loud\n📢|public address loudspeaker\n📣|cheering megaphone mega\n📯|postal horn\n🔔|bell\n🔕|bell with cancellation stroke no\n🎼|musical score\n🎵|musical note\n🎶|multiple musical notes\n🎙️|studio microphone\n🎚️|level slider\n🎛️|control knobs\n🎤|microphone\n🎧|headphone headphones\n📻|radio\n🎷|saxophone\n🪗|accordion\n🎸|guitar\n🎹|musical keyboard\n🎺|trumpet\n🎻|violin\n🪕|banjo\n🥁|drum with drumsticks\n🪘|long drum\n🪇|maracas\n🪈|flute\n📱|mobile phone iphone\n📲|mobile phone with rightwards arrow at left calling\n☎️|black telephone phone\n📞|telephone receiver\n📟|pager\n📠|fax machine\n🔋|battery\n🪫|low battery\n🔌|electric plug\n💻|personal computer\n🖥️|desktop computer\n🖨️|printer\n⌨️|keyboard\n🖱️|computer mouse three button\n🖲️|trackball\n💽|minidisc\n💾|floppy disk\n💿|optical disc cd\n📀|dvd\n🧮|abacus\n🎥|movie camera\n🎞️|film frames\n📽️|film projector\n🎬|clapper board\n📺|television tv\n📷|camera\n📸|camera with flash\n📹|video camera\n📼|videocassette vhs\n🔍|left-pointing magnifying glass mag\n🔎|right-pointing magnifying glass mag right\n🕯️|candle\n💡|electric light bulb\n🔦|electric torch flashlight\n🏮|izakaya lantern\n🪔|diya lamp\n📔|notebook with decorative cover\n📕|closed book\n📖|open book\n📗|green book\n📘|blue book\n📙|orange book\n📚|books\n📓|notebook\n📒|ledger\n📃|page with curl\n📜|scroll\n📄|page facing up\n📰|newspaper\n🗞️|rolled-up newspaper rolled up\n📑|bookmark tabs\n🔖|bookmark\n🏷️|label\n💰|money bag moneybag\n🪙|coin\n💴|banknote with yen sign\n💵|banknote with dollar sign\n💶|banknote with euro sign\n💷|banknote with pound sign\n💸|money with wings\n💳|credit card\n🧾|receipt\n💹|chart with upwards trend and yen sign\n✉️|envelope email\n📧|e-mail symbol\n📨|incoming envelope\n📩|envelope with downwards arrow above\n📤|outbox tray\n📥|inbox tray\n📦|package\n📫|closed mailbox with raised flag\n📪|closed mailbox with lowered flag\n📬|open mailbox with raised flag mail\n📭|open mailbox with lowered flag no mail\n📮|postbox\n🗳️|ballot box with\n✏️|pencil pencil2\n✒️|black nib\n🖋️|fountain pen lower left\n🖊️|pen lower left ballpoint\n🖌️|paintbrush lower left\n🖍️|crayon lower left\n📝|memo pencil\n💼|briefcase\n📁|file folder\n📂|open file folder\n🗂️|card index dividers\n📅|calendar date\n📆|tear-off calendar\n🗒️|spiral notepad note pad\n🗓️|spiral calendar pad\n📇|card index\n📈|chart with upwards trend\n📉|chart with downwards trend\n📊|bar chart\n📋|clipboard\n📌|pushpin\n📍|round pushpin\n📎|paperclip\n🖇️|linked paperclips\n📏|straight ruler\n📐|triangular ruler\n✂️|black scissors\n🗃️|card file box\n🗄️|file cabinet\n🗑️|wastebasket\n🔒|lock\n🔓|open lock unlock\n🔏|lock with ink pen\n🔐|closed lock with key\n🔑|key\n🗝️|old key\n🔨|hammer\n🪓|axe\n⛏️|pick\n⚒️|hammer and pick\n🛠️|hammer and wrench\n🗡️|dagger knife\n⚔️|crossed swords\n💣|bomb\n🪃|boomerang\n🏹|bow and arrow\n🛡️|shield\n🪚|carpentry saw\n🔧|wrench\n🪛|screwdriver\n🔩|nut and bolt\n⚙️|gear\n🗜️|clamp compression\n⚖️|balance scale scales\n🦯|probing cane\n🔗|link symbol\n⛓️‍💥|broken chain\n⛓️|chains\n🪝|hook\n🧰|toolbox\n🧲|magnet\n🪜|ladder\n⚗️|alembic\n🧪|test tube\n🧫|petri dish\n🧬|dna double helix\n🔬|microscope\n🔭|telescope\n📡|satellite antenna\n💉|syringe\n🩸|drop of blood\n💊|pill\n🩹|adhesive bandage\n🩼|crutch\n🩺|stethoscope\n🩻|x-ray\n🚪|door\n🛗|elevator\n🪞|mirror\n🪟|window\n🛏️|bed\n🛋️|couch and lamp\n🪑|chair\n🚽|toilet\n🪠|plunger\n🚿|shower\n🛁|bathtub\n🪤|mouse trap\n🪒|razor\n🧴|lotion bottle\n🧷|safety pin\n🧹|broom\n🧺|basket\n🧻|roll of paper\n🪣|bucket\n🧼|bar of soap\n🫧|bubbles\n🪥|toothbrush\n🧽|sponge\n🧯|fire extinguisher\n🛒|shopping trolley\n🚬|smoking symbol\n⚰️|coffin\n🪦|headstone\n⚱️|funeral urn\n🧿|nazar amulet\n🪬|hamsa\n🗿|moyai\n🪧|placard\n🪪|identification card"},{"n":"Symbols","t":"❤️","e":"🏧|automated teller machine atm\n🚮|put litter in its place symbol\n🚰|potable water symbol\n♿|wheelchair symbol\n🚹|mens symbol\n🚺|womens symbol\n🚻|restroom\n🚼|baby symbol\n🚾|water closet wc\n🛂|passport control\n🛃|customs\n🛄|baggage claim\n🛅|left luggage\n⚠️|warning sign\n🚸|children crossing\n⛔|no entry\n🚫|no entry sign\n🚳|no bicycles\n🚭|no smoking symbol\n🚯|do not litter symbol\n🚱|non-potable water symbol\n🚷|no pedestrians\n📵|no mobile phones\n🔞|no one under eighteen symbol underage\n☢️|radioactive sign\n☣️|biohazard sign\n⬆️|upwards black arrow up\n↗️|north east arrow upper right\n➡️|black rightwards arrow right\n↘️|south east arrow lower right\n⬇️|downwards black arrow down\n↙️|south west arrow lower left\n⬅️|leftwards black arrow left\n↖️|north west arrow upper left\n↕️|up down arrow\n↔️|left right arrow\n↩️|leftwards arrow with hook\n↪️|rightwards arrow with hook right\n⤴️|arrow pointing rightwards then curving upwards heading up\n⤵️|arrow pointing rightwards then curving downwards heading down\n🔃|clockwise downwards and upwards open circle arrows\n🔄|anticlockwise downwards and upwards open circle arrows counterclockwise\n🔙|back with leftwards arrow above\n🔚|end with leftwards arrow above\n🔛|on with exclamation mark left right arrow above\n🔜|soon with rightwards arrow above\n🔝|top with upwards arrow above\n🛐|place of worship\n⚛️|atom symbol\n🕉️|om symbol\n✡️|star of david\n☸️|wheel of dharma\n☯️|yin yang\n✝️|latin cross\n☦️|orthodox cross\n☪️|star and crescent\n☮️|peace symbol\n🕎|menorah with nine branches\n🔯|six pointed star with middle dot\n🪯|khanda\n♈|aries\n♉|taurus\n♊|gemini\n♋|cancer\n♌|leo\n♍|virgo\n♎|libra\n♏|scorpius\n♐|sagittarius\n♑|capricorn\n♒|aquarius\n♓|pisces\n⛎|ophiuchus\n🔀|twisted rightwards arrows\n🔁|clockwise rightwards and leftwards open circle arrows repeat\n🔂|clockwise rightwards and leftwards open circle arrows with circled one overlay repeat\n▶️|black right-pointing triangle arrow forward\n⏩|black right-pointing double triangle fast forward\n⏭️|next track button black right pointing double triangle with vertical bar\n⏯️|play or pause button black right pointing triangle with double vertical bar\n◀️|black left-pointing triangle arrow backward\n⏪|black left-pointing double triangle rewind\n⏮️|last track button black left pointing double triangle with vertical bar\n🔼|up-pointing small red triangle arrow up\n⏫|black up-pointing double triangle arrow up\n🔽|down-pointing small red triangle arrow down\n⏬|black down-pointing double triangle arrow down\n⏸️|pause button double vertical bar\n⏹️|stop button black square for\n⏺️|record button black circle for\n⏏️|eject button\n🎦|cinema\n🔅|low brightness symbol\n🔆|high brightness symbol\n📶|antenna with bars signal strength\n🛜|wireless\n📳|vibration mode\n📴|mobile phone off\n⚧️|transgender symbol\n✖️|heavy multiplication x\n➕|heavy plus sign\n➖|heavy minus sign\n➗|heavy division sign\n🟰|heavy equals sign\n♾️|infinity\n‼️|double exclamation mark bangbang\n⁉️|exclamation question mark interrobang\n❓|black question mark ornament\n❔|white question mark ornament grey\n❕|white exclamation mark ornament grey\n❗|heavy exclamation mark symbol\n〰️|wavy dash\n💱|currency exchange\n💲|heavy dollar sign\n♻️|black universal recycling symbol recycle\n⚜️|fleur-de-lis fleur de lis\n🔱|trident emblem\n📛|name badge\n🔰|japanese symbol for beginner\n⭕|heavy large circle o\n✅|white heavy check mark\n☑️|ballot box with check\n✔️|heavy check mark\n❌|cross mark x\n❎|negative squared cross mark\n➰|curly loop\n➿|double curly loop\n〽️|part alternation mark\n✳️|eight spoked asterisk\n✴️|eight pointed black star\n❇️|sparkle\n©️|copyright sign\n®️|registered sign\n™️|trade mark sign tm\n#️⃣|hash key\n*️⃣|keycap: * keycap star\n0️⃣|keycap 0 zero\n1️⃣|keycap 1 one\n2️⃣|keycap 2 two\n3️⃣|keycap 3 three\n4️⃣|keycap 4 four\n5️⃣|keycap 5 five\n6️⃣|keycap 6 six\n7️⃣|keycap 7 seven\n8️⃣|keycap 8 eight\n9️⃣|keycap 9 nine\n🔟|keycap ten\n🔠|input symbol for latin capital letters abcd\n🔡|input symbol for latin small letters abcd\n🔢|input symbol for numbers 1234\n🔣|input symbol for symbols\n🔤|input symbol for latin letters abc\n🅰️|negative squared latin capital letter a\n🆎|negative squared ab\n🅱️|negative squared latin capital letter b\n🆑|squared cl\n🆒|squared cool\n🆓|squared free\nℹ️|information source\n🆔|squared id\nⓂ️|circled latin capital letter m\n🆕|squared new\n🆖|squared ng\n🅾️|negative squared latin capital letter o o2\n🆗|squared ok\n🅿️|negative squared latin capital letter p parking\n🆘|squared sos\n🆙|squared up with exclamation mark\n🆚|squared vs\n🈁|squared katakana koko\n🈂️|squared katakana sa\n🈷️|squared cjk unified ideograph-6708 u6708\n🈶|squared cjk unified ideograph-6709 u6709\n🈯|squared cjk unified ideograph-6307 u6307\n🉐|circled ideograph advantage\n🈹|squared cjk unified ideograph-5272 u5272\n🈚|squared cjk unified ideograph-7121 u7121\n🈲|squared cjk unified ideograph-7981 u7981\n🉑|circled ideograph accept\n🈸|squared cjk unified ideograph-7533 u7533\n🈴|squared cjk unified ideograph-5408 u5408\n🈳|squared cjk unified ideograph-7a7a u7a7a\n㊗️|circled ideograph congratulation congratulations\n㊙️|circled ideograph secret\n🈺|squared cjk unified ideograph-55b6 u55b6\n🈵|squared cjk unified ideograph-6e80 u6e80\n🔴|large red circle\n🟠|large orange circle\n🟡|large yellow circle\n🟢|large green circle\n🔵|large blue circle\n🟣|large purple circle\n🟤|large brown circle\n⚫|medium black circle\n⚪|medium white circle\n🟥|large red square\n🟧|large orange square\n🟨|large yellow square\n🟩|large green square\n🟦|large blue square\n🟪|large purple square\n🟫|large brown square\n⬛|black large square\n⬜|white large square\n◼️|black medium square\n◻️|white medium square\n◾|black medium small square\n◽|white medium small square\n▪️|black small square\n▫️|white small square\n🔶|large orange diamond\n🔷|large blue diamond\n🔸|small orange diamond\n🔹|small blue diamond\n🔺|up-pointing red triangle small\n🔻|down-pointing red triangle small down\n💠|diamond shape with a dot inside\n🔘|radio button\n🔳|white square button\n🔲|black square button"},{"n":"Flags","t":"🏁","e":"🏁|chequered flag checkered\n🚩|triangular flag on post\n🎌|crossed flags\n🏴|waving black flag\n🏳️|white flag waving\n🏳️‍🌈|rainbow flag rainbow-flag\n🏳️‍⚧️|transgender flag\n🏴‍☠️|pirate flag\n🇦🇨|ascension island flag flag-ac\n🇦🇩|andorra flag flag-ad\n🇦🇪|united arab emirates flag flag-ae\n🇦🇫|afghanistan flag flag-af\n🇦🇬|antigua & barbuda flag flag-ag\n🇦🇮|anguilla flag flag-ai\n🇦🇱|albania flag flag-al\n🇦🇲|armenia flag flag-am\n🇦🇴|angola flag flag-ao\n🇦🇶|antarctica flag flag-aq\n🇦🇷|argentina flag flag-ar\n🇦🇸|american samoa flag flag-as\n🇦🇹|austria flag flag-at\n🇦🇺|australia flag flag-au\n🇦🇼|aruba flag flag-aw\n🇦🇽|åland islands flag flag-ax\n🇦🇿|azerbaijan flag flag-az\n🇧🇦|bosnia & herzegovina flag flag-ba\n🇧🇧|barbados flag flag-bb\n🇧🇩|bangladesh flag flag-bd\n🇧🇪|belgium flag flag-be\n🇧🇫|burkina faso flag flag-bf\n🇧🇬|bulgaria flag flag-bg\n🇧🇭|bahrain flag flag-bh\n🇧🇮|burundi flag flag-bi\n🇧🇯|benin flag flag-bj\n🇧🇱|st. barthélemy flag flag-bl\n🇧🇲|bermuda flag flag-bm\n🇧🇳|brunei flag flag-bn\n🇧🇴|bolivia flag flag-bo\n🇧🇶|caribbean netherlands flag flag-bq\n🇧🇷|brazil flag flag-br\n🇧🇸|bahamas flag flag-bs\n🇧🇹|bhutan flag flag-bt\n🇧🇻|bouvet island flag flag-bv\n🇧🇼|botswana flag flag-bw\n🇧🇾|belarus flag flag-by\n🇧🇿|belize flag flag-bz\n🇨🇦|canada flag flag-ca\n🇨🇨|cocos (keeling) islands flag flag-cc\n🇨🇩|congo - kinshasa flag flag-cd\n🇨🇫|central african republic flag flag-cf\n🇨🇬|congo - brazzaville flag flag-cg\n🇨🇭|switzerland flag flag-ch\n🇨🇮|côte d’ivoire flag flag-ci\n🇨🇰|cook islands flag flag-ck\n🇨🇱|chile flag flag-cl\n🇨🇲|cameroon flag flag-cm\n🇨🇳|china flag cn flag-cn\n🇨🇴|colombia flag flag-co\n🇨🇵|clipperton island flag flag-cp\n🇨🇷|costa rica flag flag-cr\n🇨🇺|cuba flag flag-cu\n🇨🇻|cape verde flag flag-cv\n🇨🇼|curaçao flag flag-cw\n🇨🇽|christmas island flag flag-cx\n🇨🇾|cyprus flag flag-cy\n🇨🇿|czechia flag flag-cz\n🇩🇪|germany flag de flag-de\n🇩🇬|diego garcia flag flag-dg\n🇩🇯|djibouti flag flag-dj\n🇩🇰|denmark flag flag-dk\n🇩🇲|dominica flag flag-dm\n🇩🇴|dominican republic flag flag-do\n🇩🇿|algeria flag flag-dz\n🇪🇦|ceuta & melilla flag flag-ea\n🇪🇨|ecuador flag flag-ec\n🇪🇪|estonia flag flag-ee\n🇪🇬|egypt flag flag-eg\n🇪🇭|western sahara flag flag-eh\n🇪🇷|eritrea flag flag-er\n🇪🇸|spain flag es flag-es\n🇪🇹|ethiopia flag flag-et\n🇪🇺|european union flag flag-eu\n🇫🇮|finland flag flag-fi\n🇫🇯|fiji flag flag-fj\n🇫🇰|falkland islands flag flag-fk\n🇫🇲|micronesia flag flag-fm\n🇫🇴|faroe islands flag flag-fo\n🇫🇷|france flag fr flag-fr\n🇬🇦|gabon flag flag-ga\n🇬🇧|united kingdom flag gb uk flag-gb\n🇬🇩|grenada flag flag-gd\n🇬🇪|georgia flag flag-ge\n🇬🇫|french guiana flag flag-gf\n🇬🇬|guernsey flag flag-gg\n🇬🇭|ghana flag flag-gh\n🇬🇮|gibraltar flag flag-gi\n🇬🇱|greenland flag flag-gl\n🇬🇲|gambia flag flag-gm\n🇬🇳|guinea flag flag-gn\n🇬🇵|guadeloupe flag flag-gp\n🇬🇶|equatorial guinea flag flag-gq\n🇬🇷|greece flag flag-gr\n🇬🇸|south georgia & sandwich islands flag flag-gs\n🇬🇹|guatemala flag flag-gt\n🇬🇺|guam flag flag-gu\n🇬🇼|guinea-bissau flag flag-gw\n🇬🇾|guyana flag flag-gy\n🇭🇰|hong kong sar china flag flag-hk\n🇭🇲|heard & mcdonald islands flag flag-hm\n🇭🇳|honduras flag flag-hn\n🇭🇷|croatia flag flag-hr\n🇭🇹|haiti flag flag-ht\n🇭🇺|hungary flag flag-hu\n🇮🇨|canary islands flag flag-ic\n🇮🇩|indonesia flag flag-id\n🇮🇪|ireland flag flag-ie\n🇮🇱|israel flag flag-il\n🇮🇲|isle of man flag flag-im\n🇮🇳|india flag flag-in\n🇮🇴|british indian ocean territory flag flag-io\n🇮🇶|iraq flag flag-iq\n🇮🇷|iran flag flag-ir\n🇮🇸|iceland flag flag-is\n🇮🇹|italy flag it flag-it\n🇯🇪|jersey flag flag-je\n🇯🇲|jamaica flag flag-jm\n🇯🇴|jordan flag flag-jo\n🇯🇵|japan flag jp flag-jp\n🇰🇪|kenya flag flag-ke\n🇰🇬|kyrgyzstan flag flag-kg\n🇰🇭|cambodia flag flag-kh\n🇰🇮|kiribati flag flag-ki\n🇰🇲|comoros flag flag-km\n🇰🇳|st. kitts & nevis flag flag-kn\n🇰🇵|north korea flag flag-kp\n🇰🇷|south korea flag kr flag-kr\n🇰🇼|kuwait flag flag-kw\n🇰🇾|cayman islands flag flag-ky\n🇰🇿|kazakhstan flag flag-kz\n🇱🇦|laos flag flag-la\n🇱🇧|lebanon flag flag-lb\n🇱🇨|st. lucia flag flag-lc\n🇱🇮|liechtenstein flag flag-li\n🇱🇰|sri lanka flag flag-lk\n🇱🇷|liberia flag flag-lr\n🇱🇸|lesotho flag flag-ls\n🇱🇹|lithuania flag flag-lt\n🇱🇺|luxembourg flag flag-lu\n🇱🇻|latvia flag flag-lv\n🇱🇾|libya flag flag-ly\n🇲🇦|morocco flag flag-ma\n🇲🇨|monaco flag flag-mc\n🇲🇩|moldova flag flag-md\n🇲🇪|montenegro flag flag-me\n🇲🇫|st. martin flag flag-mf\n🇲🇬|madagascar flag flag-mg\n🇲🇭|marshall islands flag flag-mh\n🇲🇰|north macedonia flag flag-mk\n🇲🇱|mali flag flag-ml\n🇲🇲|myanmar (burma) flag flag-mm\n🇲🇳|mongolia flag flag-mn\n🇲🇴|macao sar china flag flag-mo\n🇲🇵|northern mariana islands flag flag-mp\n🇲🇶|martinique flag flag-mq\n🇲🇷|mauritania flag flag-mr\n🇲🇸|montserrat flag flag-ms\n🇲🇹|malta flag flag-mt\n🇲🇺|mauritius flag flag-mu\n🇲🇻|maldives flag flag-mv\n🇲🇼|malawi flag flag-mw\n🇲🇽|mexico flag flag-mx\n🇲🇾|malaysia flag flag-my\n🇲🇿|mozambique flag flag-mz\n🇳🇦|namibia flag flag-na\n🇳🇨|new caledonia flag flag-nc\n🇳🇪|niger flag flag-ne\n🇳🇫|norfolk island flag flag-nf\n🇳🇬|nigeria flag flag-ng\n🇳🇮|nicaragua flag flag-ni\n🇳🇱|netherlands flag flag-nl\n🇳🇴|norway flag flag-no\n🇳🇵|nepal flag flag-np\n🇳🇷|nauru flag flag-nr\n🇳🇺|niue flag flag-nu\n🇳🇿|new zealand flag flag-nz\n🇴🇲|oman flag flag-om\n🇵🇦|panama flag flag-pa\n🇵🇪|peru flag flag-pe\n🇵🇫|french polynesia flag flag-pf\n🇵🇬|papua new guinea flag flag-pg\n🇵🇭|philippines flag flag-ph\n🇵🇰|pakistan flag flag-pk\n🇵🇱|poland flag flag-pl\n🇵🇲|st. pierre & miquelon flag flag-pm\n🇵🇳|pitcairn islands flag flag-pn\n🇵🇷|puerto rico flag flag-pr\n🇵🇸|palestinian territories flag flag-ps\n🇵🇹|portugal flag flag-pt\n🇵🇼|palau flag flag-pw\n🇵🇾|paraguay flag flag-py\n🇶🇦|qatar flag flag-qa\n🇷🇪|réunion flag flag-re\n🇷🇴|romania flag flag-ro\n🇷🇸|serbia flag flag-rs\n🇷🇺|russia flag ru flag-ru\n🇷🇼|rwanda flag flag-rw\n🇸🇦|saudi arabia flag flag-sa\n🇸🇧|solomon islands flag flag-sb\n🇸🇨|seychelles flag flag-sc\n🇸🇩|sudan flag flag-sd\n🇸🇪|sweden flag flag-se\n🇸🇬|singapore flag flag-sg\n🇸🇭|st. helena flag flag-sh\n🇸🇮|slovenia flag flag-si\n🇸🇯|svalbard & jan mayen flag flag-sj\n🇸🇰|slovakia flag flag-sk\n🇸🇱|sierra leone flag flag-sl\n🇸🇲|san marino flag flag-sm\n🇸🇳|senegal flag flag-sn\n🇸🇴|somalia flag flag-so\n🇸🇷|suriname flag flag-sr\n🇸🇸|south sudan flag flag-ss\n🇸🇹|são tomé & príncipe flag flag-st\n🇸🇻|el salvador flag flag-sv\n🇸🇽|sint maarten flag flag-sx\n🇸🇾|syria flag flag-sy\n🇸🇿|eswatini flag flag-sz\n🇹🇦|tristan da cunha flag flag-ta\n🇹🇨|turks & caicos islands flag flag-tc\n🇹🇩|chad flag flag-td\n🇹🇫|french southern territories flag flag-tf\n🇹🇬|togo flag flag-tg\n🇹🇭|thailand flag flag-th\n🇹🇯|tajikistan flag flag-tj\n🇹🇰|tokelau flag flag-tk\n🇹🇱|timor-leste flag flag-tl\n🇹🇲|turkmenistan flag flag-tm\n🇹🇳|tunisia flag flag-tn\n🇹🇴|tonga flag flag-to\n🇹🇷|türkiye flag flag-tr\n🇹🇹|trinidad & tobago flag flag-tt\n🇹🇻|tuvalu flag flag-tv\n🇹🇼|taiwan flag flag-tw\n🇹🇿|tanzania flag flag-tz\n🇺🇦|ukraine flag flag-ua\n🇺🇬|uganda flag flag-ug\n🇺🇲|u.s. outlying islands flag flag-um\n🇺🇳|united nations flag flag-un\n🇺🇸|united states flag us flag-us\n🇺🇾|uruguay flag flag-uy\n🇺🇿|uzbekistan flag flag-uz\n🇻🇦|vatican city flag flag-va\n🇻🇨|st. vincent & grenadines flag flag-vc\n🇻🇪|venezuela flag flag-ve\n🇻🇬|british virgin islands flag flag-vg\n🇻🇮|u.s. virgin islands flag flag-vi\n🇻🇳|vietnam flag flag-vn\n🇻🇺|vanuatu flag flag-vu\n🇼🇫|wallis & futuna flag flag-wf\n🇼🇸|samoa flag flag-ws\n🇽🇰|kosovo flag flag-xk\n🇾🇪|yemen flag flag-ye\n🇾🇹|mayotte flag flag-yt\n🇿🇦|south africa flag flag-za\n🇿🇲|zambia flag flag-zm\n🇿🇼|zimbabwe flag flag-zw\n🏴󠁧󠁢󠁥󠁮󠁧󠁿|england flag flag-england\n🏴󠁧󠁢󠁳󠁣󠁴󠁿|scotland flag flag-scotland\n🏴󠁧󠁢󠁷󠁬󠁳󠁿|wales flag flag-wales"}];
+let emojiIndex = null;
+const emojiList = i => (emojiIndex ||= EMOJI_CATS.map(c => c.e.split('\n').map(l => l.split('|'))))[i];
+
+const COLORS = ['#10b981','#3b82f6','#6366f1','#8b5cf6','#ec4899','#ef4444','#f59e0b','#f97316','#84cc16','#06b6d4','#14b8a6','#64748b'];
+const TEMPLATES = {
+  'For kids': [
+    ['🦷','Brush teeth','#06b6d4',{target:2}],['🛏️','Make my bed','#8b5cf6',{}],['📚','Read 15 minutes','#3b82f6',{}],
+    ['🧹','Tidy my room','#f59e0b',{}],['🎒','Pack school bag','#10b981',{freq_type:'weekdays'}],['🐶','Feed the pet','#f97316',{}],
+    ['✍️','Homework','#6366f1',{freq_type:'weekdays'}],['🎹','Practice instrument','#ec4899',{freq_type:'weekly',freq_per_week:3}],
+    ['🍎','Eat a fruit','#ef4444',{}],['🙏','Say thank you','#14b8a6',{}],
+  ],
+  'For grown-ups': [
+    ['💧','Morning water','#06b6d4',{}],['🏃','Exercise 20–40 min','#10b981',{}],['🧘','Meditate','#8b5cf6',{}],
+    ['📵','No phone after 9pm','#64748b',{}],['🥦','Eat veggies','#84cc16',{target:3}],['📝','Journal','#f59e0b',{}],
+    ['💊','Vitamins','#ec4899',{}],['🚶','10k steps','#3b82f6',{freq_type:'weekdays'}],['😴','In bed by 10:30','#6366f1',{}],
+  ],
+  'Everyone': [
+    ['💧','Drink 8 glasses of water','#3b82f6',{target:8}],['🌱','Go outside','#10b981',{}],['❤️','Kind act','#ef4444',{}],
+    ['🧺','Help with a chore','#f97316',{}],['🚴','Move for 30 min','#14b8a6',{freq_type:'weekly',freq_per_week:4}],
+  ],
+};
+
+// ================= backends =================
+// Both backends expose the same methods, so the whole app runs identically
+// against Supabase or against the on-device demo.
+
+function tableMissing(err) {
+  const m = (err && (err.message || '')) + ' ' + (err && err.code || '');
+  return /42P01|PGRST205|PGRST200|does not exist|schema cache/i.test(m) && /hq_/.test(m);
+}
+async function q(p) { const { data, error } = await p; if (error) throw error; return data; }
+async function all(make) {   // Supabase returns at most 1000 rows per request
+  const out = [];
+  for (let from = 0; ; from += 1000) {
+    const data = await q(make().range(from, from + 999));
+    out.push(...data);
+    if (data.length < 1000) break;
+  }
+  return out;
+}
+
+const Remote = {
+  name: 'remote',
+  async session() { const { data } = await sb.auth.getSession(); return data.session; },
+  async signIn(email, password) { const { error } = await sb.auth.signInWithPassword({ email, password }); if (error) throw error; },
+  async signOut() { await sb.auth.signOut(); },
+  async load(since, ledgerSince) {
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return { signedOut: true };
+    const mem = await q(sb.from('household_members').select('household_id').eq('user_id', user.id).limit(1));
+    if (!mem.length) return { noHousehold: true };
+    const hh = mem[0].household_id;
+    this.hh = hh;
+    const [people, habits, logs, ledger, totals, profiles] = await Promise.all([
+      q(sb.from('people').select('*').eq('household_id', hh).order('created_at')),
+      q(sb.from('hq_habits').select('*').eq('household_id', hh).order('sort').order('created_at')),
+      all(() => sb.from('hq_logs').select('habit_id,person_id,day,count').eq('household_id', hh).gte('day', since).order('habit_id').order('day')),
+      all(() => sb.from('hq_ledger').select('id,person_id,key,kind,gems,xp,freezes,item,day').eq('household_id', hh).or(`kind.neq.check,day.gte.${ledgerSince}`).order('id')),
+      q(sb.from('hq_totals').select('person_id,gems,xp,freezes').eq('household_id', hh)),
+      q(sb.from('hq_profiles').select('person_id,avatar,frame,confetti').eq('household_id', hh)),
+    ]);
+    return { household: hh, userId: user.id, people, habits, logs, ledger, totals, profiles };
+  },
+  async saveHabit(h) { await q(sb.from('hq_habits').upsert({ ...h, household_id: this.hh })); },
+  async saveHabits(list) { await q(sb.from('hq_habits').upsert(list.map(h => ({ ...h, household_id: this.hh })))); },
+  async deleteHabit(id) { await q(sb.from('hq_habits').delete().eq('id', id)); },
+  async setLog(h, day, count) {
+    if (count > 0) await q(sb.from('hq_logs').upsert({ household_id: this.hh, habit_id: h.id, person_id: h.person_id, day, count, updated_at: new Date().toISOString() }, { onConflict: 'habit_id,day' }));
+    else await q(sb.from('hq_logs').delete().eq('habit_id', h.id).eq('day', day));
+  },
+  // true = this device claimed it; false = already claimed (e.g. from another phone)
+  async addLedger(row) {
+    const data = await q(sb.from('hq_ledger').upsert({ ...row, household_id: this.hh }, { onConflict: 'person_id,key', ignoreDuplicates: true }).select('id'));
+    return data.length > 0;
+  },
+  async removeLedger(pid, key) { await q(sb.from('hq_ledger').delete().eq('person_id', pid).eq('key', key)); },
+  async saveProfile(p) { await q(sb.from('hq_profiles').upsert({ ...p, household_id: this.hh, updated_at: new Date().toISOString() })); },
+  async addPerson(name, color) { return await q(sb.from('people').insert({ household_id: this.hh, name, color }).select().single()); },
+};
+
+const DEMO_KEY = 'hq.demo.v1';
+const Demo = {
+  name: 'demo',
+  db: null,
+  save() { LS.set(DEMO_KEY, this.db); },
+  async session() { return true; },
+  async signIn() {},
+  async signOut() {},
+  async load(since, ledgerSince) {
+    this.db = LS.get(DEMO_KEY, null) || seedDemo();
+    this.save();
+    const d = this.db, totals = {};
+    for (const r of d.ledger) {
+      const t = totals[r.person_id] ||= { person_id: r.person_id, gems: 0, xp: 0, freezes: 0 };
+      t.gems += r.gems; t.xp += r.xp; t.freezes += r.freezes;
+    }
+    return {
+      household: 'demo', userId: 'demo', people: d.people, habits: d.habits,
+      logs: d.logs.filter(l => l.day >= since),
+      ledger: d.ledger.filter(r => r.kind !== 'check' || r.day >= ledgerSince),
+      totals: Object.values(totals), profiles: d.profiles,
+    };
+  },
+  async saveHabit(h) { const i = this.db.habits.findIndex(x => x.id === h.id); if (i >= 0) this.db.habits[i] = { ...this.db.habits[i], ...h }; else this.db.habits.push(h); this.save(); },
+  async saveHabits(list) { for (const h of list) await this.saveHabit(h); },
+  async deleteHabit(id) { this.db.habits = this.db.habits.filter(h => h.id !== id); this.db.logs = this.db.logs.filter(l => l.habit_id !== id); this.save(); },
+  async setLog(h, day, count) {
+    this.db.logs = this.db.logs.filter(l => !(l.habit_id === h.id && l.day === day));
+    if (count > 0) this.db.logs.push({ habit_id: h.id, person_id: h.person_id, day, count });
+    this.save();
+  },
+  async addLedger(row) { if (this.db.ledger.some(r => r.person_id === row.person_id && r.key === row.key)) return false; this.db.ledger.push(row); this.save(); return true; },
+  async removeLedger(pid, key) { this.db.ledger = this.db.ledger.filter(r => !(r.person_id === pid && r.key === key)); this.save(); },
+  async saveProfile(p) { this.db.profiles = this.db.profiles.filter(x => x.person_id !== p.person_id); this.db.profiles.push(p); this.save(); },
+  async addPerson(name, color) { const p = { id: uuid(), name, color, created_at: new Date().toISOString() }; this.db.people.push(p); this.save(); return p; },
+};
+
+function seedDemo() {
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const t = today(), created = new Date(parse(addDays(t, -200))).toISOString();
+  const mk = (name, color) => ({ id: uuid(), name, color, created_at: created });
+  const people = [mk('Andrew', '#6366f1'), mk('Liz', '#ec4899'), mk('Henley', '#10b981'), mk('Vanessa', '#f59e0b')];
+  const [A, L, H, V] = people.map(p => p.id);
+  let sort = 0;
+  const hb = (pid, icon, name, color, extra = {}, rate = .8) => ({ id: uuid(), person_id: pid, icon, name, color, freq_type: 'daily', freq_days: [], freq_per_week: 3, target: 1, description: null, archived: false, sort: sort++, created_at: created, _rate: rate, ...extra });
+  const habits = [
+    hb(A, '💧', 'Morning water', '#06b6d4', {}, .9), hb(A, '🏃', 'Exercise 20–40 min', '#10b981', {}, .7), hb(A, '🦶', 'Foot routine', '#14b8a6', {}, .6), hb(A, '📚', 'Read 20 pages', '#3b82f6', { freq_type: 'weekly', freq_per_week: 4 }, .6),
+    hb(L, '🧘', 'Meditate', '#8b5cf6', {}, .85), hb(L, '🥦', 'Eat veggies', '#84cc16', { target: 3 }, .75), hb(L, '🚶', '10k steps', '#3b82f6', { freq_type: 'weekdays' }, .7),
+    hb(H, '🦷', 'Brush teeth', '#06b6d4', { target: 2 }, .9), hb(H, '🛏️', 'Make my bed', '#8b5cf6', {}, .75), hb(H, '📚', 'Read 15 minutes', '#3b82f6', {}, .7), hb(H, '🎹', 'Piano practice', '#ec4899', { freq_type: 'weekly', freq_per_week: 3 }, .5),
+    hb(V, '🦷', 'Brush teeth', '#06b6d4', { target: 2 }, .9), hb(V, '🧹', 'Tidy my room', '#f59e0b', {}, .6), hb(V, '🐶', 'Feed the dog', '#f97316', {}, .85), hb(V, '✍️', 'Homework', '#6366f1', { freq_type: 'weekdays' }, .8),
+  ];
+  const logs = [], ledger = [];
+  const add = (pid, key, kind, gems, xp, day, extra = {}) => ledger.push({ id: uuid(), person_id: pid, key, kind, gems, xp, freezes: 0, item: null, day, ...extra });
+  // recent run of perfect-ish days so everyone has a streak going
+  const streakLen = { [A]: 12, [L]: 26, [H]: 5, [V]: 9 };
+  for (let i = 120; i >= 1; i--) {
+    const day = addDays(t, -i);
+    for (const p of people) {
+      const inStreak = i <= streakLen[p.id];
+      if (!inStreak && (i === streakLen[p.id] + 1 || rnd() < .3)) continue;   // an off day
+      let dueAll = 0, doneAll = 0;
+      for (const h of habits.filter(h => h.person_id === p.id)) {
+        const due = isDueRaw(h, day);
+        const ramp = Math.min(1, .45 + (180 - i) / 250);
+        const hit = rnd() < (inStreak ? Math.max(h._rate, .85) : h._rate * ramp);
+        if (due && h.freq_type !== 'weekly') dueAll++;
+        if (h.freq_type === 'weekly' ? hit && rnd() < .6 : due && hit) {
+          logs.push({ habit_id: h.id, person_id: p.id, day, count: h.target });
+          add(p.id, `check:${h.id}:${day}`, 'check', GEMS_PER_HABIT, XP_PER_HABIT, day);
+          if (due && h.freq_type !== 'weekly') doneAll++;
+        } else if (inStreak && due && h.freq_type !== 'weekly' && doneAll === 0 && h === habits.find(x => x.person_id === p.id)) {
+          logs.push({ habit_id: h.id, person_id: p.id, day, count: h.target }); doneAll++;
+        }
+      }
+      if (dueAll && doneAll === dueAll) add(p.id, `perfect:${day}`, 'perfect', PERFECT_GEMS, PERFECT_XP, day);
+    }
+  }
+  habits.forEach(h => delete h._rate);
+  add(H, 'buy:a-dino', 'buy', -200, 0, addDays(t, -30), { item: 'a-dino' });
+  add(V, 'buy:a-uni', 'buy', -150, 0, addDays(t, -20), { item: 'a-uni' });
+  add(V, 'buy:rainbow', 'buy', -400, 0, addDays(t, -10), { item: 'rainbow' });
+  add(L, 'buy:freeze:1', 'buy', -FREEZE_PRICE, 0, addDays(t, -8), { item: 'freeze', freezes: 1 });
+  const profiles = [
+    { person_id: A, avatar: '🦊', frame: 'none', confetti: 'classic' },
+    { person_id: L, avatar: '🦉', frame: 'none', confetti: 'classic' },
+    { person_id: H, avatar: '🦖', frame: 'none', confetti: 'classic' },
+    { person_id: V, avatar: '🦄', frame: 'rainbow', confetti: 'classic' },
+  ];
+  return { people, habits, logs, ledger, profiles };
+}
+
+// ================= state =================
+const S = {
+  api: null, household: null, userId: null,
+  people: [], habits: [], ledger: [], totals: {}, profiles: {},
+  logMap: new Map(), habitById: new Map(), keyMap: new Map(), active: {}, frozen: {},
+  pid: null, tab: 'today', selDay: today(), since: addDays(today(), -HISTORY_DAYS), loadedAt: 0, enter: true,
+};
+const person = pid => S.people.find(p => p.id === pid);
+const tot = pid => S.totals[pid] ||= { gems: 0, xp: 0, freezes: 0 };
+const prof = pid => S.profiles[pid] || { person_id: pid, avatar: null, frame: 'none', confetti: 'classic' };
+const logCount = (hid, day) => S.logMap.get(hid + '|' + day) || 0;
+const hasKey = (pid, key) => S.keyMap.has(pid + '|' + key);
+const habitsOf = pid => S.habits.filter(h => h.person_id === pid && !h.archived);
+
+function ingest(d) {
+  S.household = d.household; S.userId = d.userId;
+  S.people = d.people.map(p => ({ ...p, color: safeColor(p.color) }));
+  S.habits = d.habits.map(h => ({ ...h, color: safeColor(h.color), freq_days: h.freq_days || [] }));
+  S.habits.sort((a, b) => (a.sort || 0) - (b.sort || 0) || String(a.created_at).localeCompare(String(b.created_at)));
+  S.logMap = new Map(d.logs.map(l => [l.habit_id + '|' + l.day, l.count]));
+  S.ledger = d.ledger;
+  S.totals = {}; for (const t of d.totals) S.totals[t.person_id] = { gems: t.gems, xp: t.xp, freezes: t.freezes };
+  S.profiles = {}; for (const p of d.profiles) S.profiles[p.person_id] = p;
+  S.since = addDays(today(), -HISTORY_DAYS);
+  S.loadedAt = Date.now();
+  reindex();
+}
+function reindex() {
+  S.habitById = new Map(S.habits.map(h => [h.id, h]));
+  S.keyMap = new Map(S.ledger.map(r => [r.person_id + '|' + r.key, r]));
+  S.active = {}; S.frozen = {};
+  for (const [k, c] of S.logMap) {
+    if (c <= 0) continue;
+    const [hid, day] = k.split('|'); const h = S.habitById.get(hid);
+    if (h) (S.active[h.person_id] ||= new Set()).add(day);
+  }
+  for (const r of S.ledger) if (r.kind === 'freeze_use') (S.frozen[r.person_id] ||= new Set()).add(r.day);
+}
+
+// ================= habit maths =================
+function isDueRaw(h, day) {
+  const w = dow(day);
+  switch (h.freq_type) {
+    case 'weekdays': return w >= 1 && w <= 5;
+    case 'weekends': return w === 0 || w === 6;
+    case 'days': return (h.freq_days || []).includes(w);
+    default: return true;   // daily, and weekly (any day counts)
+  }
+}
+const isDue = (h, day) => isDueRaw(h, day) && localDay(h.created_at) <= day;
+const isDone = (h, day) => logCount(h.id, day) >= h.target;
+const weekDone = (h, ws) => { let n = 0; for (let i = 0; i < 7; i++) if (isDone(h, addDays(ws, i))) n++; return n; };
+const isFrozen = (pid, day) => !!S.frozen[pid]?.has(day);
+
+function habitStreak(h) {
+  const t = today();
+  if (h.freq_type === 'weekly') {
+    let ws = weekStart(t), n = weekDone(h, ws) >= h.freq_per_week ? 1 : 0;
+    for (ws = addDays(ws, -7); ws >= S.since && weekDone(h, ws) >= h.freq_per_week; ws = addDays(ws, -7)) n++;
+    return n;
+  }
+  let n = isDone(h, t) ? 1 : 0;
+  for (let d = addDays(t, -1); d >= S.since; d = addDays(d, -1)) {
+    if (!isDueRaw(h, d)) continue;
+    if (isDone(h, d)) n++;
+    else if (isFrozen(h.person_id, d)) continue;
+    else break;
+  }
+  return n;
+}
+function habitBest(h) {
+  const t = today(); let best = 0, run = 0;
+  if (h.freq_type === 'weekly') {
+    for (let ws = weekStart(S.since); ws <= t; ws = addDays(ws, 7)) {
+      if (weekDone(h, ws) >= h.freq_per_week) best = Math.max(best, ++run);
+      else if (ws !== weekStart(t)) run = 0;
+    }
+    return best;
+  }
+  for (let d = S.since; d <= t; d = addDays(d, 1)) {
+    if (!isDueRaw(h, d)) continue;
+    if (isDone(h, d)) best = Math.max(best, ++run);
+    else if (!isFrozen(h.person_id, d) && d !== t) run = 0;
+  }
+  return best;
+}
+function habitDays(h) { let n = 0; for (const [k, c] of S.logMap) if (c >= h.target && k.startsWith(h.id + '|')) n++; return n; }
+
+function personStreak(pid) {
+  const t = today(), act = S.active[pid] || new Set();
+  const doneToday = act.has(t);
+  let d = doneToday ? t : addDays(t, -1), n = 0;
+  // a frozen day keeps the streak alive but doesn't add to it
+  for (let i = 0; (act.has(d) || isFrozen(pid, d)) && i < 5000; i++) { if (act.has(d)) n++; d = addDays(d, -1); }
+  return { n, doneToday, start: addDays(d, 1) };
+}
+function dueToday(pid, day) { return habitsOf(pid).filter(h => isDue(h, day)); }
+function dayProgress(pid, day) {
+  const hs = dueToday(pid, day).filter(h => h.freq_type !== 'weekly' || weekDone(h, weekStart(day)) < h.freq_per_week || isDone(h, day));
+  const done = hs.filter(h => isDone(h, day)).length;
+  return { done, total: hs.length };
+}
+function isPerfect(pid, day) {
+  const hs = dueToday(pid, day).filter(h => h.freq_type !== 'weekly');
+  return hs.length > 0 && hs.every(h => isDone(h, day));
+}
+function stats(pid, ctx = {}) {
+  let checks = 0;
+  const hs = new Set(S.habits.filter(h => h.person_id === pid).map(h => h.id));
+  for (const [k, c] of S.logMap) { const [hid] = k.split('|'); if (hs.has(hid) && c >= S.habitById.get(hid).target) checks++; }
+  const rows = S.ledger.filter(r => r.person_id === pid);
+  const cnt = kind => rows.filter(r => r.kind === kind).length;
+  return {
+    checks, streak: personStreak(pid).n, perfect: cnt('perfect'), chests: cnt('chest'), buys: cnt('buy'),
+    freezeUsed: cnt('freeze_use'), habits: habitsOf(pid).length, level: levelOf(tot(pid).xp),
+    early: !!ctx.early, owl: !!ctx.owl, team: !!ctx.team,
+  };
+}
+function ownedItems(pid) {
+  const own = new Set(SHOP.avatars.filter(a => !a.p).map(a => a.id));
+  own.add('none'); own.add('classic');
+  for (const r of S.ledger) if (r.person_id === pid && r.kind === 'buy' && r.item) own.add(r.item);
+  return own;
+}
+function weekXp(pid) { const ws = weekStart(today()); return S.ledger.filter(r => r.person_id === pid && r.day >= ws).reduce((a, r) => a + r.xp, 0); }
+
+// ================= ledger (gems / xp / freezes) =================
+let saveErrShown = 0;
+function saveFailed(e) {
+  console.error(e);
+  if (Date.now() - saveErrShown > 4000) { saveErrShown = Date.now(); toast('⚠️', "Couldn't save — check your connection. Pull to refresh.", 'err'); }
+}
+function applyLocal(row, sign) {
+  const t = tot(row.person_id);
+  t.gems += sign * row.gems; t.xp += sign * row.xp; t.freezes += sign * (row.freezes || 0);
+}
+async function award(pid, key, kind, gems, xp, extra = {}) {
+  if (hasKey(pid, key)) return false;
+  const row = { id: uuid(), person_id: pid, key, kind, gems, xp, freezes: extra.freezes || 0, item: extra.item || null, day: extra.day || today() };
+  S.ledger.push(row); S.keyMap.set(pid + '|' + key, row); applyLocal(row, 1);
+  if (kind === 'freeze_use') (S.frozen[pid] ||= new Set()).add(row.day);
+  try {
+    const ok = await S.api.addLedger(row);
+    if (!ok) { dropLocal(pid, key); return false; }
+  } catch (e) { dropLocal(pid, key); saveFailed(e); return false; }
+  return true;
+}
+function dropLocal(pid, key) {
+  const row = S.keyMap.get(pid + '|' + key); if (!row) return;
+  S.ledger = S.ledger.filter(r => r !== row); S.keyMap.delete(pid + '|' + key); applyLocal(row, -1);
+  if (row.kind === 'freeze_use') S.frozen[pid]?.delete(row.day);
+}
+async function unaward(pid, key) {
+  const row = S.keyMap.get(pid + '|' + key); if (!row) return;
+  dropLocal(pid, key);
+  try { await S.api.removeLedger(pid, key); } catch (e) { saveFailed(e); }
+}
+
+// Streak freezes: when someone missed day(s), spend freezes (if they have enough) to cover
+// the gap so the streak survives. Keyed per day, so two phones doing this at once is harmless.
+async function applyFreezes() {
+  const t = today(), notices = [];
+  for (const p of S.people) {
+    const have = tot(p.id).freezes; if (have <= 0) continue;
+    const act = S.active[p.id] || new Set();
+    let last = null;
+    for (let d = addDays(t, -1), i = 0; i < 60; i++, d = addDays(d, -1)) if (act.has(d) || isFrozen(p.id, d)) { last = d; break; }
+    if (!last) continue;
+    const gap = []; for (let d = addDays(last, 1); d < t; d = addDays(d, 1)) gap.push(d);
+    if (!gap.length || gap.length > have) continue;
+    for (const d of gap) await award(p.id, 'freeze_use:' + d, 'freeze_use', 0, 0, { freezes: -1, day: d });
+    notices.push({ pid: p.id, used: gap.length });
+  }
+  return notices;
+}
+
+// ================= sound + haptics =================
+let AC = null;
+const soundOn = () => LS.get('hq.sound', true);
+function ac() { if (!soundOn()) return null; try { AC ||= new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); } catch { return null; } return AC; }
+function tone(f, at, dur, type = 'sine', vol = .12) {
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain(), t0 = a.currentTime + at;
+  o.type = type; o.frequency.setValueAtTime(f, t0);
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0 + .01); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+  o.connect(g).connect(a.destination); o.start(t0); o.stop(t0 + dur + .05);
+}
+const sfx = {
+  check(combo) { const b = 523.25 * Math.pow(2, Math.min(combo, 12) / 12); tone(b, 0, .12, 'triangle'); tone(b * 1.5, .07, .18, 'triangle'); },
+  undo() { tone(330, 0, .1, 'sine', .08); tone(262, .06, .12, 'sine', .08); },
+  coin() { tone(988, 0, .08, 'square', .05); tone(1319, .07, .22, 'square', .05); },
+  fanfare() { [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .1, .3, 'triangle', .1)); tone(1047, .45, .6, 'triangle', .08); tone(1319, .45, .6, 'sine', .06); },
+  pop() { tone(660, 0, .06, 'sine', .08); },
+  thud() { tone(110, 0, .25, 'sine', .2); tone(80, .02, .3, 'triangle', .12); },
+};
+const buzz = ms => { try { navigator.vibrate?.(ms); } catch {} };
+let comboN = 0, comboT = 0;
+function bumpCombo() { const now = Date.now(); comboN = now - comboT < 8000 ? comboN + 1 : 0; comboT = now; return comboN; }
+
+// ================= visual fx =================
+const fx = $('#fx'), ctx = fx.getContext('2d');
+let parts = [], fxRunning = false;
+function sizeFx() { const r = devicePixelRatio || 1; fx.width = innerWidth * r; fx.height = innerHeight * r; ctx.setTransform(r, 0, 0, r, 0, 0); }
+addEventListener('resize', sizeFx); sizeFx();
+function runFx() {
+  if (fxRunning) return; fxRunning = true;
+  const step = () => {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    parts = parts.filter(p => p.life > 0 && p.y < innerHeight + 60);
+    for (const p of parts) {
+      p.vy += p.g; p.vx *= p.drag; p.vy *= p.drag; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life--;
+      ctx.save(); ctx.globalAlpha = Math.min(1, p.life / 25); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      if (p.emoji) { ctx.font = p.s + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.emoji, 0, 0); }
+      else if (p.shape === 'c') { ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(0, 0, p.s / 2, 0, 7); ctx.fill(); }
+      else { ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); }
+      ctx.restore();
+    }
+    if (parts.length) requestAnimationFrame(step); else { fxRunning = false; ctx.clearRect(0, 0, innerWidth, innerHeight); }
+  };
+  requestAnimationFrame(step);
+}
+function burst(x, y, color, n = 18) {
+  const cs = [color, '#fff', '#fde047'];
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, v = 3 + Math.random() * 6;
+    parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 2, g: .25, drag: .94, rot: 0, vr: .2, s: 5 + Math.random() * 5, c: cs[i % 3], shape: 'c', life: 40 + Math.random() * 20 });
+  }
+  runFx();
+}
+function confetti(pid, big = true) {
+  const style = SHOP.confetti.find(c => c.id === prof(pid).confetti) || SHOP.confetti[0];
+  const cs = ['#22c55e', '#38bdf8', '#a78bfa', '#f472b6', '#fbbf24', '#f97316', '#fff'];
+  const n = big ? 160 : 70;
+  for (let i = 0; i < n; i++) {
+    const fromLeft = i % 2 === 0;
+    const x = fromLeft ? -10 : innerWidth + 10, y = innerHeight * (.55 + Math.random() * .3);
+    const a = fromLeft ? -Math.PI / 2 + .25 + Math.random() * .7 : -Math.PI / 2 - .25 - Math.random() * .7, v = 12 + Math.random() * 12;
+    const p = { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: .32, drag: .985, rot: Math.random() * 6, vr: (Math.random() - .5) * .3, s: 8 + Math.random() * 7, c: cs[i % cs.length], life: 160 + Math.random() * 80 };
+    if (style.set && i % 2 === 0) { p.emoji = style.set[i % style.set.length]; p.s = 22 + Math.random() * 12; p.vr *= .4; }
+    parts.push(p);
+  }
+  runFx();
+}
+function floatText(x, y, text, color) {
+  const el = document.createElement('div'); el.className = 'float'; el.textContent = text;
+  el.style.left = x + 'px'; el.style.top = y + 'px'; if (color) el.style.color = color;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1200);
+}
+function flyGems(x, y, amount) {
+  const target = $('#pill-gems'); if (!target) return;
+  const tr = target.getBoundingClientRect(), tx = tr.left + 16, ty = tr.top + tr.height / 2;
+  const n = clamp(Math.round(amount / 3), 3, 10);
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div'); el.className = 'fly'; el.textContent = '💎';
+    el.style.left = x - 11 + 'px'; el.style.top = y - 11 + 'px'; document.body.appendChild(el);
+    const sx = (Math.random() - .5) * 90, sy = -30 - Math.random() * 60;
+    el.animate([
+      { transform: 'translate(0,0) scale(.4)', opacity: 0 },
+      { transform: `translate(${sx}px,${sy}px) scale(1.1)`, opacity: 1, offset: .3 },
+      { transform: `translate(${tx - x}px,${ty - y}px) scale(.6)`, opacity: .9 },
+    ], { duration: 750 + i * 45, easing: 'cubic-bezier(.5,0,.3,1)', fill: 'forwards' }).onfinish = () => {
+      el.remove(); if (i === 0) { sfx.coin(); } bumpPill('pill-gems');
+    };
+  }
+}
+function comboText(n) {
+  const el = document.createElement('div'); el.className = 'combo';
+  el.textContent = n >= 5 ? `🔥 COMBO x${n + 1}!` : `Combo x${n + 1}!`;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 950);
+}
+const shown = {};   // numbers currently displayed in the header, for count-up animation
+function countTo(id, to) {
+  const el = document.getElementById(id); if (!el) return;
+  const from = shown[id] ?? to; shown[id] = to;
+  if (from === to) { el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 700;
+  const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(Math.round(from + (to - from) * e)); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function bumpPill(id) { const el = document.getElementById(id); if (!el) return; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+
+// ================= toasts / sheets / modals =================
+function toast(e, text, kind = '', ms = 2600) {
+  const el = document.createElement('div'); el.className = 'toast ' + kind;
+  el.innerHTML = `<span class="e">${esc(e)}</span><span>${text}</span>`;
+  $('#toasts').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, ms);
+}
+let sheetClose = null;
+function openSheet(html, onMount) {
+  closeSheet(true);
+  const wrap = document.createElement('div');
+  wrap.innerHTML = `<div class="backdrop"></div><div class="sheet" role="dialog"><div class="grab"></div>${html}</div>`;
+  $('#layer').appendChild(wrap);
+  const close = () => {
+    wrap.querySelector('.sheet').classList.add('out'); wrap.querySelector('.backdrop').classList.add('out');
+    setTimeout(() => wrap.remove(), 250); if (sheetClose === close) sheetClose = null;
+  };
+  wrap.querySelector('.backdrop').onclick = close;
+  sheetClose = close;
+  onMount && onMount(wrap.querySelector('.sheet'), close);
+  return close;
+}
+function closeSheet(instant) { if (sheetClose) { const c = sheetClose; sheetClose = null; c(); } }
+
+function modal(html, { onMount, dismiss = true } = {}) {
+  return new Promise(resolve => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = `<div class="backdrop"></div><div class="modal-wrap"><div class="modal">${html}</div></div>`;
+    $('#layer').appendChild(wrap);
+    const m = wrap.querySelector('.modal');
+    const close = val => { m.classList.add('out'); wrap.querySelector('.backdrop').classList.add('out'); setTimeout(() => { wrap.remove(); resolve(val); }, 200); };
+    if (dismiss) wrap.querySelector('.modal-wrap').onclick = e => { if (e.target.classList.contains('modal-wrap')) close(); };
+    m.querySelectorAll('[data-close]').forEach(b => b.onclick = () => close(b.dataset.close));
+    onMount && onMount(m, close);
+  });
+}
+// celebrations play one after another, never on top of each other
+const celebQ = []; let celebBusy = false;
+function celebrate(fn) { celebQ.push(fn); if (!celebBusy) drainCeleb(); }
+async function drainCeleb() { celebBusy = true; while (celebQ.length) { try { await celebQ.shift()(); } catch (e) { console.error(e); } } celebBusy = false; }
+
+// ================= avatars =================
+function avatar(pid, size = '') {
+  const p = person(pid) || { name: '?', color: '#6366f1' }, pr = prof(pid);
+  const frame = pr.frame && pr.frame !== 'none' ? ' f-' + esc(pr.frame) : '';
+  const inner = pr.avatar ? esc(pr.avatar) : esc((p.name || '?').trim().charAt(0).toUpperCase());
+  return `<span class="av ${size}${pr.avatar ? ' emo' : ''}${frame}" style="--c:${safeColor(p.color)}">${inner}</span>`;
+}
+function ringSvg(size, stroke, pct, color, bg = '#26324d') {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${bg}" stroke-width="${stroke}"/>` +
+    `<circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - clamp(pct, 0, 1))}" style="transition:stroke-dashoffset .6s cubic-bezier(.3,1.3,.5,1)"/></svg>`;
+}
+const freqLabel = h => ({ daily: 'Daily', weekdays: 'Weekdays', weekends: 'Weekends', weekly: `${h.freq_per_week}× a week`,
+  days: (h.freq_days || []).slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(d => ['Su','Mo','Tu','We','Th','Fr','Sa'][d]).join(' ') || 'Pick days' }[h.freq_type] || 'Daily');
+
+// ================= rendering =================
+function render() {
+  if (!S.pid) return;
+  const app = $('#app');
+  const st = personStreak(S.pid), t = tot(S.pid);
+  app.innerHTML = `
+    ${S.api === Demo ? '<div class="demo-bar">DEMO · NOT SAVED TO YOUR FAMILY</div>' : ''}
+    <header class="top">
+      <button class="me-chip" data-act="switch">${avatar(S.pid, 'sm')}<b>${esc(person(S.pid)?.name)}</b><span class="chev">▼</span></button>
+      <div class="pills">
+        <div class="pill fire ${st.doneToday ? '' : 'off'}" id="pill-fire" title="Day streak"><span class="e">🔥</span><span id="n-fire">${fmt(st.n)}</span></div>
+        <div class="pill" id="pill-gems" title="Gems"><span class="e">💎</span><span id="n-gems">${fmt(shown['n-gems'] ?? t.gems)}</span></div>
+        ${t.freezes > 0 ? `<div class="pill" title="Streak freezes"><span class="e">🧊</span>${t.freezes}</div>` : ''}
+      </div>
+    </header>
+    <main id="view" class="${S.enter ? 'enter' : ''}">${VIEWS[S.tab]()}</main>
+    ${['today', 'habits'].includes(S.tab) ? `<button class="fab" data-act="new-habit" aria-label="New habit"><svg><use href="#i-plus"/></svg></button>` : ''}
+    <nav class="tabs">
+      <span class="ind" style="transform:translateX(${['today','habits','family','shop','me'].indexOf(S.tab) * 100}%)"></span>
+      ${[['today','Today'],['habits','Habits'],['family','Family'],['shop','Shop'],['me','Me']].map(([k, n]) =>
+        `<button data-tab="${k}" class="${S.tab === k ? 'on' : ''}"><svg><use href="#i-${k}"/></svg>${n}</button>`).join('')}
+    </nav>`;
+  S.enter = false;
+  shown['n-gems'] ??= t.gems;
+  countTo('n-gems', t.gems);
+  shown['n-fire'] = st.n;
+  LS.set('hq.lastStreak.' + S.pid, st.n);
+}
+
+const VIEWS = {
+  today() {
+    const pid = S.pid, day = S.selDay, t = today();
+    const d = parse(day), ws = weekStart(day), st = personStreak(pid);
+    const hs = dueToday(pid, day);
+    const pr = dayProgress(pid, day);
+    const pct = pr.total ? pr.done / pr.total : 0;
+    const msgs = pct >= 1 ? ['Perfect day! 🌟', 'You crushed it! 💪', 'All done — legend! 🏆'] : pct >= .5 ? ['Over halfway! Keep going 🚀', 'So close now! 🔥'] : pct > 0 ? ['Nice start! ✨', 'You’re rolling! 🎳'] : ['Let’s get the first one! 👊', 'A new day to shine ☀️'];
+    const msg = msgs[(parse(day).getDate()) % msgs.length];
+    const hour = new Date().getHours();
+    const chestReady = day === t && hasKey(pid, 'perfect:' + t) && !hasKey(pid, 'chest:' + t);
+    return `
+      <div class="date-row">
+        <div class="date-badge">${d.getDate()}</div>
+        <div><div class="t1">${day === t ? 'Today' : DAYNAMES[d.getDay()]}</div><div class="muted">${DAYNAMES[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}</div></div>
+      </div>
+      <div class="week">${[0,1,2,3,4,5,6].map(i => {
+        const dd = addDays(ws, i), p = dayProgress(pid, dd), fut = dd > t;
+        const ring = p.total && !fut ? ringSvg(40, 3, p.done / p.total, p.done >= p.total ? '#22c55e' : '#f97316', 'transparent') : '';
+        const dot = S.active[pid]?.has(dd) ? 'on' : isFrozen(pid, dd) ? 'frz' : '';
+        return `<button data-day="${dd}" class="${dd === day ? 'sel' : ''} ${fut ? 'fut' : ''}"><span class="dw">${'MTWTFSS'[i]}</span><span class="dn">${ring}${parse(dd).getDate()}</span><span class="dot ${dot}"></span></button>`;
+      }).join('')}</div>
+      ${pr.total ? `<div class="card progress"><div class="row"><span>${msg}</span><span class="muted small">${pr.done}/${pr.total}</span></div><div class="bar"><i style="width:${pct * 100}%"></i></div></div>` : ''}
+      ${day === t && !st.doneToday && st.n > 0 ? `<div class="risk"><span class="e">${hour >= 17 ? '⏰' : '🔥'}</span><span>${hour >= 17 ? `Your ${st.n}-day streak ends at midnight! Do one habit to save it.` : `Do one habit to make it a ${st.n + 1}-day streak!`}</span></div>` : ''}
+      ${day < t ? `<div class="risk" style="background:#1e293b;border-color:var(--line)"><span class="e">📅</span><span class="small">Catching up on ${DAYNAMES[d.getDay()]}. Past days count for streaks but don't earn gems.</span></div>` : ''}
+      ${chestReady ? `<button class="chest-card" data-act="chest"><span class="e">🎁</span><span>Daily chest unlocked!<br><span style="font-weight:600;opacity:.85">Tap to open it</span></span></button>` : ''}
+      <h2>Habits <span class="count">${hs.length}</span><button class="right" data-tab="habits">See all ›</button></h2>
+      ${hs.length ? hs.map(h => habitRow(h, day)).join('') : `<div class="card empty"><div class="big">🌱</div><b>No habits ${day === t ? 'for today' : 'this day'}</b><div class="small" style="margin:6px 0 14px">Start small. One tiny habit is enough.</div><button class="btn green" data-act="new-habit">Add a habit</button></div>`}
+    `;
+  },
+  habits() {
+    const pid = S.pid, all = S.habits.filter(h => h.person_id === pid), live = all.filter(h => !h.archived), arch = all.filter(h => h.archived);
+    return `
+      ${live.length && !S.reorder ? overallCard(pid) : ''}
+      <h2>${esc(person(pid)?.name)}’s habits <span class="count">${live.length}</span>${live.length > 1 ? `<button class="right" data-act="reorder">${S.reorder ? 'Done' : '↕ Reorder'}</button>` : ''}</h2>
+      ${live.length ? live.map((h, i) => S.reorder ? reorderRow(h, i, live.length) : habitCard(h)).join('') : `<div class="card empty"><div class="big">🎯</div><b>No habits yet</b><div class="small" style="margin:6px 0 14px">Tap + to add one, or grab a template.</div><button class="btn green" data-act="new-habit">Add a habit</button></div>`}
+      ${arch.length ? `<h2 class="muted" style="font-size:17px">Archived <span class="count">${arch.length}</span></h2>${arch.map(h => `<div class="hcard arch" data-edit="${h.id}"><div class="hd"><span class="e">${esc(h.icon)}</span><b>${esc(h.name)}</b><span class="tag">Tap to restore</span></div></div>`).join('')}` : ''}
+    `;
+  },
+  family() {
+    const t = today(), ws = weekStart(t);
+    const rows = S.people.map(p => ({ p, pr: dayProgress(p.id, t), st: personStreak(p.id), xp: weekXp(p.id), lvl: levelOf(tot(p.id).xp) }));
+    const maxXp = Math.max(1, ...rows.map(r => r.xp));
+    const ranked = rows.slice().sort((a, b) => b.xp - a.xp);
+    const q = familyQuest();
+    return `
+      <h2>Family today</h2>
+      <div class="fam">${rows.map(r => {
+        const pct = r.pr.total ? r.pr.done / r.pr.total : 0;
+        return `<button class="fp ${r.p.id === S.pid ? 'cur' : ''}" data-person="${r.p.id}">
+          ${ranked[0].xp > 0 && ranked[0].p.id === r.p.id ? '<span class="crown">👑</span>' : ''}
+          <div class="ringwrap">${ringSvg(84, 6, pct, pct >= 1 ? '#22c55e' : '#6366f1')}${avatar(r.p.id, 'md')}</div>
+          <div class="nm">${esc(r.p.name)}</div>
+          <div class="mini"><span style="color:${r.st.doneToday ? 'var(--fire)' : ''}">🔥 ${r.st.n}</span><span>⭐ Lv ${r.lvl}</span></div>
+          <div class="small muted">${r.pr.total ? (pct >= 1 ? 'All done! 🎉' : `${r.pr.done} of ${r.pr.total} done`) : 'No habits today'}</div>
+        </button>`;
+      }).join('')}</div>
+      <h2>Family quest</h2>
+      <div class="card quest">
+        <div style="display:flex;justify-content:space-between;font-weight:800"><span>🏰 Complete ${q.target} habits together this week</span></div>
+        <div class="bar"><i style="width:${Math.min(100, q.done / q.target * 100)}%"></i></div>
+        <div class="small" style="display:flex;justify-content:space-between;color:#c4b5fd"><span>${q.done} / ${q.target}</span><span>${q.done >= q.target ? 'Quest complete! +30 💎 each' : 'Reward: +30 💎 for everyone'}</span></div>
+      </div>
+      <h2>This week’s league <span class="count">XP</span></h2>
+      <div class="lb">${ranked.map((r, i) => `
+        <div class="row"><span class="pos">${['🥇','🥈','🥉'][i] || i + 1}</span>${avatar(r.p.id, 'sm')}
+          <div style="flex:1;min-width:0"><div style="font-weight:800;margin-bottom:4px">${esc(r.p.name)}</div><div class="b"><i style="width:${r.xp / maxXp * 100}%;background:${r.p.color}"></i></div></div>
+          <span class="xp">${fmt(r.xp)} XP</span></div>`).join('')}</div>
+      <div style="margin-top:16px"><button class="btn block" data-act="add-person">＋ Add family member</button></div>
+      <p class="small muted" style="text-align:center">League resets every Monday.</p>
+    `;
+  },
+  shop() {
+    const pid = S.pid, t = tot(pid), own = ownedItems(pid), pr = prof(pid);
+    const item = (it, kind, big, name) => {
+      const owned = own.has(it.id), eq = kind === 'avatar' ? pr.avatar === it.e : kind === 'frame' ? (pr.frame || 'none') === it.id : (pr.confetti || 'classic') === it.id;
+      return `<button class="item ${owned ? 'own' : ''} ${eq ? 'eq' : ''} ${!owned && t.gems < it.p ? 'poor' : ''}" data-buy="${kind}:${it.id}">
+        <span class="big">${big}</span>${name ? `<span class="nm">${esc(name)}</span>` : ''}
+        <span class="pr">${eq ? '✓ Using' : owned ? 'Owned' : `💎 ${it.p}`}</span></button>`;
+    };
+    return `
+      <div class="card shop-hero" style="margin-top:8px"><span class="g">💎</span><div><div class="v">${fmt(t.gems)}</div><div style="opacity:.8;font-weight:700">gems to spend</div></div></div>
+      <h2>Power-ups</h2>
+      <div class="card freeze-card">
+        <span class="big">🧊</span>
+        <div style="flex:1"><b>Streak Freeze</b><div class="small muted">Covers a missed day so your streak survives. You can hold ${MAX_FREEZES}.</div><div class="small" style="margin-top:4px;color:var(--ice);font-weight:800">You have ${t.freezes}/${MAX_FREEZES}</div></div>
+        <button class="btn primary" data-act="buy-freeze" ${t.freezes >= MAX_FREEZES || t.gems < FREEZE_PRICE ? 'disabled' : ''}>💎 ${FREEZE_PRICE}</button>
+      </div>
+      <h2>Avatars</h2>
+      <div class="grid3">${SHOP.avatars.map(a => item(a, 'avatar', a.e)).join('')}</div>
+      <h2>Avatar frames</h2>
+      <div class="grid3">${SHOP.frames.map(f => item(f, 'frame', `<span class="av ${f.id !== 'none' ? 'f-' + f.id : ''} emo" style="--c:${person(pid)?.color}">${esc(pr.avatar || '🙂')}</span>`, f.n)).join('')}</div>
+      <h2>Celebrations</h2>
+      <div class="grid3">${SHOP.confetti.map(c => item(c, 'confetti', c.e, c.n)).join('')}</div>
+      <p class="small muted" style="text-align:center;margin-top:18px">Earn gems by finishing habits, perfect days, chests, streaks and badges.</p>
+    `;
+  },
+  me() {
+    const pid = S.pid, p = person(pid), t = tot(pid), lvl = levelOf(t.xp), st = personStreak(pid);
+    const a = lvlXp(lvl), b = lvlXp(lvl + 1);
+    const s = stats(pid);
+    const earned = new Set(S.ledger.filter(r => r.person_id === pid && r.kind === 'badge').map(r => r.key.slice(6)));
+    return `
+      <div class="prof">
+        ${avatar(pid, 'lg')}
+        <div class="name">${esc(p?.name)}</div>
+        <div class="title">Level ${lvl} · ${titleOf(lvl)}</div>
+        <div class="pills" style="margin:0"><div class="pill">🔥 ${st.n} day streak</div><div class="pill">✅ ${fmt(s.checks)}</div></div>
+      </div>
+      <div class="card lvl" style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;font-weight:800"><span>⭐ Level ${lvl}</span><span class="muted small">${fmt(t.xp - a)} / ${fmt(b - a)} XP to level ${lvl + 1}</span></div>
+        <div class="bar"><i style="width:${(t.xp - a) / (b - a) * 100}%"></i></div>
+      </div>
+      <h2>Activity</h2>
+      ${overallCard(pid, true)}
+      <h2>Badges <span class="count">${earned.size}/${BADGES.length}</span></h2>
+      <div class="badges">${BADGES.map(bd => `<button class="bdg ${earned.has(bd.id) ? '' : 'lock'}" data-badge="${bd.id}"><span class="e">${bd.e}</span><span class="n">${esc(bd.n)}</span></button>`).join('')}</div>
+      <h2>Settings</h2>
+      <div class="card" style="padding:0">
+        <button class="setrow" data-act="switch"><span>👥 Switch person</span><span class="muted">›</span></button>
+        <button class="setrow" data-act="sound"><span>🔊 Sounds</span><span class="switch ${soundOn() ? 'on' : ''}"></span></button>
+        <button class="setrow" data-act="refresh"><span>🔄 Refresh from cloud</span><span class="muted">›</span></button>
+        <button class="setrow" data-act="signout"><span>${S.api === Demo ? '🚪 Leave demo' : '🚪 Sign out'}</span><span class="muted">›</span></button>
+      </div>
+      <p class="small muted" style="text-align:center;margin-top:16px">Habit Quest · shares your family with The Board</p>
+    `;
+  },
+};
+
+function habitRow(h, day) {
+  const c = logCount(h.id, day), done = c >= h.target, st = habitStreak(h);
+  const weekly = h.freq_type === 'weekly' ? `<span>${weekDone(h, weekStart(day))}/${h.freq_per_week} this week</span>` : `<span>${freqLabel(h)}</span>`;
+  const multi = h.target > 1;
+  return `<div class="habit ${done ? 'done' : c ? 'part' : ''}" style="--c:${h.color}" data-hid="${h.id}">
+    <span class="ic">${esc(h.icon)}</span>
+    <div class="info" data-edit="${h.id}"><div class="nm">${esc(h.name)}</div><div class="sub">${weekly}${st ? `<span class="st">🔥 ${st}</span>` : ''}${multi ? `<span>${c}/${h.target}</span>` : ''}</div></div>
+    ${multi && c > 0 ? `<button class="minus" data-minus="${h.id}" aria-label="Undo one">−</button>` : ''}
+    <button class="chk" data-check="${h.id}" aria-label="Check off ${esc(h.name)}">
+      ${multi && !done ? `${ringSvg(62, 4, c / h.target, h.color, 'transparent').replace('<svg', '<svg class="ring"')}<span class="cnt">${c ? c + '/' + h.target : ''}</span>${c ? '' : '<svg class="tick"><use href="#i-tick"/></svg>'}` : '<svg class="tick" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
+    </button>
+  </div>`;
+}
+function habitCard(h) {
+  const ws = d => weekDone(h, weekStart(d)) >= h.freq_per_week;
+  return `<div class="hcard" data-edit="${h.id}">
+    <div class="hd"><span class="e">${esc(h.icon)}</span><b>${esc(h.name)}</b><span class="tag">${esc(freqLabel(h))}</span></div>
+    <div class="stats"><span>🔥 <b>${habitStreak(h)}</b> streak</span><span>🏆 <b>${habitBest(h)}</b> best</span><span>✅ <b>${habitDays(h)}</b> days</span></div>
+    ${grid(d => {
+      const c = logCount(h.id, d), due = isDueRaw(h, d), frz = isFrozen(h.person_id, d);
+      return {
+        v: c ? Math.min(1, c / h.target) : 0,
+        nd: !due && !c,
+        frz: frz && due && !c,
+        on: c >= h.target,
+        // days that don't break this habit's streak line
+        skip: h.freq_type === 'weekly' ? ws(d) : (!due || frz),
+      };
+    }, h.color)}
+  </div>`;
+}
+function reorderRow(h, i, n) {
+  return `<div class="hcard reo" data-hrow="${h.id}">
+    <div class="hd"><span class="e">${esc(h.icon)}</span><b>${esc(h.name)}</b></div>
+    <button class="rbtn" data-move="${h.id}:-1" ${i === 0 ? 'disabled' : ''} aria-label="Move up">▲</button>
+    <button class="rbtn" data-move="${h.id}:1" ${i === n - 1 ? 'disabled' : ''} aria-label="Move down">▼</button>
+  </div>`;
+}
+
+// How much of a person's day got done: 0..1, or null when nothing was due.
+// Each habit counts as a fraction, so 1 of 2 brushes = half a habit.
+function dayScore(pid, d) {
+  const hs = S.habits.filter(h => h.person_id === pid && localDay(h.created_at) <= d && (!h.archived || logCount(h.id, d)));
+  const due = hs.filter(h => h.freq_type !== 'weekly' && isDueRaw(h, d));
+  let got = 0;
+  for (const h of due) got += Math.min(1, logCount(h.id, d) / h.target);
+  const weeklyDone = hs.some(h => h.freq_type === 'weekly' && logCount(h.id, d));
+  if (!due.length) return weeklyDone ? 1 : (S.active[pid]?.has(d) ? 1 : null);
+  if (weeklyDone) got = Math.min(due.length, got + .5);
+  return got / due.length;
+}
+function overallCard(pid, compact) {
+  const t = today();
+  let perfect = 0, sum = 0, n = 0;
+  for (let i = 0; i < 30; i++) { const v = dayScore(pid, addDays(t, -i)); if (v == null) continue; n++; sum += v; if (v >= 1) perfect++; }
+  const st = personStreak(pid);
+  const sw = [.15, .45, .75, .99].map(v => `<i style="background:${rampColor('#2563eb', v)};opacity:${rampAlpha(v)}"></i>`).join('') + `<i style="background:linear-gradient(#cffafe,#22d3ee);box-shadow:0 0 6px #22d3ee"></i>`;
+  return `<div class="card overall">
+    ${compact ? '' : `<div class="hd" style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px"><span>🌈</span>All habits</div>`}
+    <div class="stats"><span>🔥 <b>${st.n}</b> streak</span><span>🌟 <b>${perfect}</b> perfect</span><span>📈 <b>${n ? Math.round(sum / n * 100) : 0}%</b> last 30d</span></div>
+    ${grid(d => { const v = dayScore(pid, d), act = S.active[pid]?.has(d), frz = isFrozen(pid, d);
+      return { v: v || 0, nd: v == null && !frz, frz: frz && !act, on: !!act, skip: frz }; }, '#22d3ee', true)}
+    <div class="legend">Less ${sw} 100%</div>
+  </div>`;
+}
+
+// colour helpers: low days lean faded/darker, full days go bright
+function mixHex(a, b, t) {
+  const p = x => [1, 3, 5].map(i => parseInt(x.slice(i, i + 2), 16));
+  const A = p(a), B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join('');
+}
+const rampAlpha = v => (.3 + .55 * v).toFixed(2);
+function rampColor(color, v, overall) {
+  // overall board: deep blue -> cyan (like a glowing bar); habit boards: dim -> full habit colour
+  return overall ? mixHex('#1d4ed8', '#22d3ee', v) : mixHex(mixHex(color, '#0b1120', .35), color, v);
+}
+
+// One SVG per board so the squares scale cleanly at any width.
+// cellFn(day) -> { v: 0..1, nd: not due, frz: frozen }
+let gridN = 0;
+function grid(cellFn, color, overall = false) {
+  const W = 26, C = 10, G = 3, P = C + G, TOP = 15, t = today(), start = addDays(weekStart(t), -7 * (W - 1));
+  const id = 'gg' + (++gridN);
+  const bright = overall ? '#cffafe' : mixHex(color, '#ffffff', .55);
+  const xy = i => [Math.floor(i / 7) * P, TOP + (i % 7) * P];
+  let labels = '', base = '', full = '', today_ = '';
+  for (let w = 0; w < W; w++) {
+    const wd = parse(addDays(start, 7 * w));
+    if (wd.getDate() <= 7 && w < W - 2) labels += `<text x="${w * P}" y="10">${MONTHS[wd.getMonth()]}</text>`;
+  }
+  for (let i = 0; i < W * 7; i++) {
+    const d = addDays(start, i); if (d > t) break;
+    const c = cellFn(d), [x, y] = xy(i);
+    const r = `x="${x}" y="${y}" width="${C}" height="${C}" rx="2.5"`;
+    if (c.v >= 1) full += `<rect ${r} fill="url(#${id})"/>`;
+    else if (c.v > 0) base += `<rect ${r} fill="${rampColor(color, c.v, overall)}" fill-opacity="${rampAlpha(c.v)}"/>`;
+    else base += `<rect ${r} fill="${c.frz ? '#7dd3fc' : c.nd ? '#1a2438' : '#243049'}"${c.frz ? ' fill-opacity=".35"' : ''}/>`;
+    if (d === t) today_ = `<rect x="${x - 1}" y="${y - 1}" width="${C + 2}" height="${C + 2}" rx="3.5" fill="none" stroke="#38bdf8" stroke-width="1.5"/>`;
+  }
+  return `<svg class="grid" viewBox="-1 0 ${W * P - G + 2} ${TOP + 7 * P - G + 1}" role="img" aria-label="Completion grid">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bright}"/><stop offset="1" stop-color="${overall ? '#22d3ee' : color}"/></linearGradient></defs>
+    ${labels}${base}<g filter="url(#glow)">${full}</g>${today_}</svg>`;
+}
+function familyQuest() {
+  const t = today(), ws = weekStart(t);
+  let expected = 0, done = 0;
+  for (const h of S.habits) {
+    if (h.archived) continue;
+    if (h.freq_type === 'weekly') expected += h.freq_per_week;
+    else for (let i = 0; i < 7; i++) if (isDueRaw(h, addDays(ws, i))) expected++;
+  }
+  for (const h of S.habits) for (let i = 0; i < 7; i++) { const d = addDays(ws, i); if (d <= t && isDone(h, d)) done++; }
+  return { target: Math.max(10, Math.round(expected * .7 / 5) * 5), done, week: ws };
+}
+
+// ================= the big one: ticking a habit =================
+async function setCount(h, day, nw, btn) {
+  const pid = h.person_id, t = today(), old = logCount(h.id, day);
+  if (nw === old) return;
+  const r = btn ? btn.getBoundingClientRect() : { left: innerWidth / 2, top: innerHeight / 2, width: 0, height: 0 };
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const before = { streak: personStreak(pid), lvl: levelOf(tot(pid).xp) };
+  if (nw > 0) S.logMap.set(h.id + '|' + day, nw); else S.logMap.delete(h.id + '|' + day);
+  reindex();
+  S.api.setLog(h, day, nw).catch(saveFailed);
+
+  const wasDone = old >= h.target, nowDone = nw >= h.target, up = nw > old;
+  if (up) { const cb = bumpCombo(); sfx.check(cb); buzz(12); burst(cx, cy, h.color, nowDone ? 22 : 10); if (cb >= 2 && nowDone) comboText(cb); }
+  else { sfx.undo(); buzz(6); }
+
+  if (day === t) {
+    if (!wasDone && nowDone) {
+      const hs = habitStreak(h), bonus = clamp(hs - 1, 0, 10);
+      award(pid, `check:${h.id}:${day}`, 'check', GEMS_PER_HABIT + bonus, XP_PER_HABIT, { day });
+      flyGems(cx, cy, GEMS_PER_HABIT + bonus);
+      floatText(cx, cy - 30, `+${XP_PER_HABIT} XP`, '#c084fc');
+      if (bonus) setTimeout(() => floatText(cx - 60, cy - 10, `🔥 +${bonus} streak bonus`, '#fdba74'), 250);
+    } else if (wasDone && !nowDone) {
+      unaward(pid, `check:${h.id}:${day}`);
+    }
+  }
+  render();
+  if (up) {
+    const row = document.querySelector(`.habit[data-hid="${h.id}"]`);
+    if (row) { row.classList.add('pop'); }
+    bumpPill('pill-gems');
+  }
+  if (!up) return;
+
+  // --- follow-on rewards (only for today) ---
+  const gemsBefore = tot(pid).gems;
+  const after = personStreak(pid);
+  if (day === t && !before.streak.doneToday && after.doneToday) {
+    bumpPill('pill-fire');
+    const ms = MILESTONES.find(([n]) => n === after.n);
+    let msGems = 0;
+    if (ms && await award(pid, `ms:${ms[0]}:${after.start}`, 'milestone', ms[1], 0)) msGems = ms[1];
+    celebrate(() => streakModal(pid, after.n, msGems));
+  } else if (day !== t) {
+    // back-filling can join two streaks together — just refresh the flame
+  }
+  if (day === t && isPerfect(pid, t) && !hasKey(pid, 'perfect:' + t)) {
+    if (await award(pid, 'perfect:' + t, 'perfect', PERFECT_GEMS, PERFECT_XP)) {
+      celebrate(() => perfectModal(pid));
+      const everyone = S.people.filter(p => dueToday(p.id, t).some(h => h.freq_type !== 'weekly'));
+      if (everyone.length > 1 && everyone.every(p => hasKey(p.id, 'perfect:' + t)))
+        for (const p of everyone) await checkBadges(p.id, { team: true });
+    }
+  }
+  const lvl = levelOf(tot(pid).xp);
+  if (lvl > before.lvl) for (let n = before.lvl + 1; n <= lvl; n++) {
+    if (await award(pid, 'level:' + n, 'level', n * 10, 0)) celebrate(() => levelModal(pid, n));
+  }
+  const hr = new Date().getHours();
+  if (day === t) await checkBadges(pid, { early: hr < 8, owl: hr >= 21 });
+  await checkQuest();
+  if (tot(pid).gems !== gemsBefore) render();
+}
+
+async function checkBadges(pid, ctx = {}) {
+  const s = stats(pid, ctx);
+  for (const b of BADGES) {
+    if (hasKey(pid, 'badge:' + b.id) || !b.t(s)) continue;
+    if (await award(pid, 'badge:' + b.id, 'badge', b.g, 0)) {
+      if (pid === S.pid) celebrate(async () => { sfx.fanfare(); toast(b.e, `<div>Badge unlocked: <b>${esc(b.n)}</b><div class="small" style="opacity:.8">+${b.g} 💎 · ${esc(b.d)}</div></div>`, 'badge', 3400); bumpPill('pill-gems'); await sleep(900); });
+    }
+  }
+}
+async function checkQuest() {
+  const q = familyQuest();
+  if (q.done < q.target) return;
+  let any = false;
+  for (const p of S.people) if (await award(p.id, 'quest:' + q.week, 'quest', 30, 0)) any = true;
+  if (any) celebrate(() => { sfx.fanfare(); confetti(S.pid); return modal(`<div class="rays"></div><div class="hero">🏰</div><h1>Family quest complete!</h1><p>You did ${q.done} habits together this week. Everyone gets a bonus.</p><div class="reward">+30 💎 each</div><br><button class="btn green block" data-close>Woohoo!</button>`); });
+}
+
+// ================= celebration modals =================
+function weekDotsHtml(pid) {
+  const ws = weekStart(today()), act = S.active[pid] || new Set();
+  return `<div class="wk">${[0,1,2,3,4,5,6].map(i => { const d = addDays(ws, i), on = act.has(d), fz = isFrozen(pid, d);
+    return `<div>${'MTWTFSS'[i]}<span class="${on ? 'on' : fz ? 'fz' : ''}" style="animation-delay:${.3 + i * .08}s">${on ? '✓' : fz ? '🧊' : ''}</span></div>`; }).join('')}</div>`;
+}
+function streakModal(pid, n, msGems) {
+  sfx.fanfare(); buzz([20, 40, 20]);
+  const lines = n === 1 ? 'Day one! Every streak starts here.' : n < 7 ? 'Come back tomorrow to keep it going!' : n < 30 ? 'You’re building something real. 💪' : 'Absolutely unstoppable. 🔥';
+  return modal(`<div class="rays" style="background:repeating-conic-gradient(from 0deg,rgba(249,115,22,.14) 0 10deg,transparent 10deg 20deg)"></div>
+    <div class="flame-big">🔥</div><div class="streak-num" id="snum">${Math.max(0, n - 1)}</div>
+    <h1 style="margin-top:2px">day streak!</h1><p><b style="color:var(--text)">Nice one, ${esc(person(pid)?.name)}!</b> ${lines}</p>
+    ${weekDotsHtml(pid)}
+    ${msGems ? `<div class="reward">🏅 ${n}-day milestone +${msGems} 💎</div><br>` : ''}
+    <button class="btn green block" data-close>Keep it up!</button>`,
+    { onMount: m => setTimeout(() => { const el = m.querySelector('#snum'); if (el) { el.textContent = n; el.animate([{ transform: 'scale(1.6)' }, { transform: 'scale(1)' }], { duration: 500, easing: 'cubic-bezier(.3,1.8,.5,1)' }); sfx.pop(); } if (msGems) confetti(pid, false); }, 450) });
+}
+function perfectModal(pid) {
+  confetti(pid); sfx.fanfare(); buzz([30, 50, 30]);
+  return modal(`<div class="rays"></div><div class="hero">🌟</div><h1>Perfect day!</h1>
+    <p>Every habit done. That’s how legends are made.</p>
+    <div class="reward">+${PERFECT_GEMS} 💎</div><div class="reward xp">+${PERFECT_XP} XP</div><br>
+    <p style="margin-top:-6px">🎁 A daily chest just unlocked!</p>
+    <button class="btn green block" data-close="chest">Open the chest</button>`).then(v => { if (v === 'chest') return openChest(); });
+}
+function levelModal(pid, n) {
+  sfx.fanfare(); confetti(pid, false); buzz([20, 30, 20, 30, 60]);
+  return modal(`<div class="rays"></div><div class="small muted" style="font-weight:800;letter-spacing:.1em">LEVEL UP</div>
+    <div class="lvlnum">${n}</div><h1>${titleOf(n)}</h1><p>${esc(person(pid)?.name)} reached level ${n}!</p>
+    <div class="reward">+${n * 10} 💎</div><br><button class="btn primary block" data-close>Awesome!</button>`);
+}
+function openChest() {
+  const pid = S.pid, t = today();
+  if (hasKey(pid, 'chest:' + t) || !hasKey(pid, 'perfect:' + t)) return;
+  const roll = Math.random();
+  const gems = roll < .6 ? 10 + Math.floor(Math.random() * 11) : roll < .92 ? 25 + Math.floor(Math.random() * 16) : 60 + Math.floor(Math.random() * 41);
+  const jackpot = gems >= 60;
+  return modal(`<div class="rays" style="opacity:0;transition:opacity .4s" id="crays"></div>
+    <div class="small muted" style="font-weight:800;letter-spacing:.1em" id="ctitle">DAILY CHEST</div>
+    <div class="chest" id="chest">🎁</div>
+    <h1 id="ch">Tap to open!</h1><p id="cp">What’s inside?</p>
+    <button class="btn green block hidden" data-close id="cdone">Collect</button>`,
+  { dismiss: false, onMount: (m) => {
+    const ch = m.querySelector('#chest');
+    ch.onclick = async () => {
+      if (ch.dataset.opened) return; ch.dataset.opened = 1;
+      sfx.thud(); buzz(40);
+      ch.classList.add('open'); await sleep(350);
+      ch.textContent = jackpot ? '💰' : '💎';
+      m.querySelector('#crays').style.opacity = 1;
+      const r = ch.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + r.height / 2, '#38bdf8', 40);
+      if (jackpot) confetti(pid);
+      sfx.fanfare();
+      m.querySelector('#ctitle').textContent = jackpot ? '✨ JACKPOT ✨' : 'YOU FOUND';
+      const h = m.querySelector('#ch'); let k = 0;
+      const tick = () => { k = Math.min(gems, k + Math.ceil(gems / 18)); h.textContent = `+${k} gems!`; if (k < gems) setTimeout(tick, 35); };
+      tick();
+      m.querySelector('#cp').textContent = jackpot ? 'Legendary luck!' : 'Come back tomorrow for another.';
+      m.querySelector('#cdone').classList.remove('hidden');
+      await award(pid, 'chest:' + t, 'chest', gems, 0);
+      await checkBadges(pid);
+      render();
+    };
+  } });
+}
+
+// ================= forms =================
+function habitForm(existing, prefill) {
+  const h = existing ? { ...existing } : { id: uuid(), person_id: S.pid, name: '', icon: '⭐', color: COLORS[0], freq_type: 'daily', freq_days: [1,2,3,4,5], freq_per_week: 3, target: 1, description: null, archived: false, sort: S.habits.length, created_at: new Date().toISOString(), ...prefill };
+  const isNew = !existing;
+  const pick = { open: false, cat: -1, q: '' };   // -1 = "Popular"
+  const cell = ch => `<button data-icon="${esc(ch)}" class="${ch === h.icon ? 'on' : ''}">${esc(ch)}</button>`;
+  const gridHtml = () => {
+    const q = pick.q.trim().toLowerCase();
+    if (q) {
+      // typed/pasted a real emoji (e.g. from the iPhone emoji keyboard)? offer it directly
+      const typed = [...new Set(pick.q.match(/\p{Extended_Pictographic}(\uFE0F|\u200D\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}])*/gu) || [])];
+      const words = q.split(/\s+/).filter(w => !/\p{Extended_Pictographic}/u.test(w));
+      const hits = [];
+      if (words.length) for (let i = 0; i < EMOJI_CATS.length && hits.length < 160; i++)
+        for (const [ch, kw] of emojiList(i)) if (words.every(w => kw.includes(w))) { hits.push(ch); if (hits.length >= 160) break; }
+      const all = [...typed, ...hits.filter(x => !typed.includes(x))];
+      return all.length ? all.map(cell).join('') : '<div class="none">No emoji found — try another word</div>';
+    }
+    return (pick.cat < 0 ? ICONS : emojiList(pick.cat).map(x => x[0])).map(cell).join('');
+  };
+  const pickerHtml = () => `
+    <input id="f-eq" placeholder="🔍 Search all emojis (e.g. dog, book, run)" value="${esc(pick.q)}" autocomplete="off">
+    <div class="etabs">${[['⭐', -1], ...EMOJI_CATS.map((c, i) => [c.t, i])].map(([t, i]) => `<button data-ecat="${i}" class="${!pick.q && pick.cat === i ? 'on' : ''}" aria-label="${i < 0 ? 'Popular' : esc(EMOJI_CATS[i].n)}">${t}</button>`).join('')}</div>
+    <div class="ecat">${pick.q ? 'Search results' : pick.cat < 0 ? 'Popular' : esc(EMOJI_CATS[pick.cat].n)}</div>
+    <div class="icons" id="f-egrid">${gridHtml()}</div>`;
+  const body = () => `
+    <h3>${isNew ? 'New habit' : 'Edit habit'}</h3>
+    <div class="namerow"><button class="bigic" data-f="icons">${esc(h.icon)}</button><input id="f-name" maxlength="80" placeholder="e.g. Morning water" value="${esc(h.name)}"></div>
+    ${isNew ? `<button class="btn" style="margin-top:12px;padding:10px 14px;color:#a5b4fc" data-f="tpl">✨ Browse templates</button>` : ''}
+    <div id="f-icons" class="${pick.open ? '' : 'hidden'}" style="margin-top:12px">${pickerHtml()}</div>
+    <span class="lbl">For</span>
+    <div class="chips">${S.people.map(p => `<button class="chip ${h.person_id === p.id ? 'on' : ''}" data-for="${p.id}">${esc(p.name)}</button>`).join('')}</div>
+    <span class="lbl">How often</span>
+    <div class="chips">${[['daily','Daily'],['weekdays','Weekdays'],['weekends','Weekends'],['days','Pick days'],['weekly','X per week']].map(([k, n]) => `<button class="chip ${h.freq_type === k ? 'on' : ''}" data-freq="${k}">${n}</button>`).join('')}</div>
+    ${h.freq_type === 'days' ? `<div class="days7">${[1,2,3,4,5,6,0].map(d => `<button class="chip ${h.freq_days.includes(d) ? 'on' : ''}" data-dayt="${d}">${'SMTWTFS'[d]}</button>`).join('')}</div>` : ''}
+    ${h.freq_type === 'weekly' ? `<div class="stepper" style="margin-top:12px"><button data-step="pw:-1">−</button><b>${h.freq_per_week}</b><button data-step="pw:1">+</button><span class="muted">times a week</span></div>` : ''}
+    <span class="lbl">Times per day</span>
+    <div class="stepper"><button data-step="tg:-1">−</button><b>${h.target}</b><button data-step="tg:1">+</button><span class="muted">${h.target > 1 ? 'tap the button once per time' : 'just once'}</span></div>
+    <span class="lbl">Colour</span>
+    <div class="swatches">${COLORS.map(c => `<button class="sw ${c === h.color ? 'on' : ''}" style="--c:${c}" data-color="${c}" aria-label="colour ${c}"></button>`).join('')}</div>
+    <div style="margin-top:26px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn green block" data-f="save">${isNew ? 'Create habit' : 'Save'}</button>
+      ${!isNew ? `<button class="btn block" data-f="archive">${h.archived ? '♻️ Restore habit' : '📦 Archive (keeps history)'}</button><button class="btn danger block" data-f="delete">🗑️ Delete forever</button>` : ''}
+    </div>`;
+  openSheet('<div id="hf"></div>', (sheet, close) => {
+    const root = sheet.querySelector('#hf');
+    const paint = () => { const nm = root.querySelector('#f-name'); if (nm) h.name = nm.value; root.innerHTML = body(); };
+    paint();
+    root.oninput = e => {
+      if (e.target.id !== 'f-eq') return;
+      pick.q = e.target.value;
+      root.querySelector('#f-egrid').innerHTML = gridHtml();
+      root.querySelector('.ecat').textContent = pick.q ? 'Search results' : pick.cat < 0 ? 'Popular' : EMOJI_CATS[pick.cat].n;
+      root.querySelectorAll('.etabs button').forEach(t => t.classList.toggle('on', !pick.q && +t.dataset.ecat === pick.cat));
+    };
+    root.onclick = async e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const nm = root.querySelector('#f-name'); h.name = nm.value;
+      if (b.dataset.icon) { h.icon = b.dataset.icon; pick.open = false; sfx.pop(); return paint(); }
+      if (b.dataset.ecat) { pick.cat = +b.dataset.ecat; pick.q = ''; root.querySelector('#f-icons').innerHTML = pickerHtml(); return; }
+      if (b.dataset.for) { h.person_id = b.dataset.for; return paint(); }
+      if (b.dataset.freq) { h.freq_type = b.dataset.freq; return paint(); }
+      if (b.dataset.dayt) { const d = +b.dataset.dayt; h.freq_days = h.freq_days.includes(d) ? h.freq_days.filter(x => x !== d) : [...h.freq_days, d]; return paint(); }
+      if (b.dataset.step) { const [k, v] = b.dataset.step.split(':'); if (k === 'pw') h.freq_per_week = clamp(h.freq_per_week + +v, 1, 7); else h.target = clamp(h.target + +v, 1, 20); return paint(); }
+      if (b.dataset.color) { h.color = b.dataset.color; return paint(); }
+      const f = b.dataset.f;
+      if (f === 'icons') { pick.open = !pick.open; root.querySelector('#f-icons').classList.toggle('hidden', !pick.open); return; }
+      if (f === 'tpl') return templatesSheet(h);
+      if (f === 'save') {
+        h.name = h.name.trim();
+        if (!h.name) { nm.classList.add('wiggle'); nm.focus(); setTimeout(() => nm.classList.remove('wiggle'), 400); return; }
+        if (h.freq_type === 'days' && !h.freq_days.length) { toast('📅', 'Pick at least one day'); return; }
+        await saveHabit(h, existing); close();
+        if (isNew) { sfx.fanfare(); toast(h.icon, `<b>${esc(h.name)}</b> added! Let’s go 🚀`); if (h.person_id !== S.pid) toast('👀', `Added to ${esc(person(h.person_id)?.name)}’s list`); await checkBadges(h.person_id); render(); }
+        return;
+      }
+      if (f === 'archive') { h.archived = !h.archived; await saveHabit(h, existing); close(); toast(h.archived ? '📦' : '♻️', h.archived ? 'Archived — history kept' : 'Restored'); return; }
+      if (f === 'delete') {
+        const ok = await modal(`<div class="hero">🗑️</div><h1>Delete “${esc(h.name)}”?</h1><p>This removes its history too. Gems already earned are kept.</p><div style="display:flex;gap:10px"><button class="btn block" data-close>Cancel</button><button class="btn danger block" data-close="yes">Delete</button></div>`);
+        if (ok !== 'yes') return;
+        S.habits = S.habits.filter(x => x.id !== h.id);
+        for (const k of [...S.logMap.keys()]) if (k.startsWith(h.id + '|')) S.logMap.delete(k);
+        reindex(); render(); close();
+        S.api.deleteHabit(h.id).catch(saveFailed);
+      }
+    };
+  });
+}
+// Swap a habit with its neighbour in this person's list, then renumber everyone's `sort`
+// so the order is identical on every phone.
+function moveHabit(hid, dir) {
+  const h = S.habitById.get(hid); if (!h) return;
+  const list = S.habits.filter(x => x.person_id === h.person_id && !x.archived);
+  const i = list.indexOf(h), j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  const changed = [];
+  list.forEach((x, k) => { if (x.sort !== k) { x.sort = k; changed.push(x); } });
+  S.habits.sort((a, b) => a.sort - b.sort || String(a.created_at).localeCompare(String(b.created_at)));
+  reindex(); sfx.pop(); buzz(8); render();
+  document.querySelector(`[data-hrow="${hid}"]`)?.classList.add('moved');
+  if (changed.length) S.api.saveHabits(changed).catch(saveFailed);
+}
+async function saveHabit(h, existing) {
+  const row = { id: h.id, person_id: h.person_id, name: h.name.slice(0, 80), icon: h.icon, color: safeColor(h.color), freq_type: h.freq_type, freq_days: h.freq_days, freq_per_week: h.freq_per_week, target: h.target, description: h.description, archived: h.archived, sort: h.sort, created_at: h.created_at };
+  if (existing && existing.person_id !== h.person_id) {
+    // moving a habit to someone else: logs belong to the old owner, so start fresh
+    for (const k of [...S.logMap.keys()]) if (k.startsWith(h.id + '|')) S.logMap.delete(k);
+    await S.api.deleteHabit(h.id).catch(saveFailed);
+    row.id = h.id = uuid(); row.created_at = new Date().toISOString();
+    S.habits = S.habits.filter(x => x.id !== existing.id);
+  }
+  const i = S.habits.findIndex(x => x.id === row.id);
+  if (i >= 0) S.habits[i] = row; else S.habits.push(row);
+  reindex(); render();
+  try { await S.api.saveHabit(row); } catch (e) { saveFailed(e); }
+}
+function templatesSheet(h) {
+  openSheet(`<h3>Templates</h3>${Object.entries(TEMPLATES).map(([g, list]) => `<span class="lbl">${esc(g)}</span>${list.map((t, i) => `<button class="tpl" data-tpl="${esc(g)}|${i}"><span class="e">${t[0]}</span>${esc(t[1])}<span class="muted small" style="margin-left:auto">${esc(freqLabel({ freq_type: 'daily', freq_per_week: 3, ...t[3] }))}${t[3].target ? ` · ${t[3].target}×` : ''}</span></button>`).join('')}`).join('')}`,
+    (sheet, close) => {
+      sheet.onclick = e => {
+        const b = e.target.closest('[data-tpl]'); if (!b) return;
+        const [g, i] = b.dataset.tpl.split('|'), t = TEMPLATES[g][+i];
+        close();
+        setTimeout(() => habitForm(null, { person_id: h.person_id, icon: t[0], name: t[1], color: t[2], freq_type: 'daily', freq_per_week: 3, target: 1, ...t[3] }), 260);
+      };
+    });
+}
+
+// ================= people =================
+function whoIsPlaying() {
+  const wrap = document.createElement('div'); wrap.className = 'who';
+  wrap.innerHTML = `<div class="logo" style="font-size:44px">💎</div><h1>Who’s playing?</h1>
+    <div class="grid">${S.people.map((p, i) => { const st = personStreak(p.id); return `<button data-p="${p.id}" style="animation-delay:${i * .07}s">${avatar(p.id)}<span>${esc(p.name)}</span><span class="sub">🔥 ${st.n} · Lv ${levelOf(tot(p.id).xp)}</span></button>`; }).join('')}
+    <button data-add style="animation-delay:${S.people.length * .07}s"><span class="av" style="--c:#1d2940;border:2px dashed #3b4a6b;color:var(--muted)">＋</span><span class="muted">Add</span><span class="sub">&nbsp;</span></button></div>`;
+  document.body.appendChild(wrap);
+  wrap.onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-add')) return addPersonSheet();
+    sfx.pop(); buzz(10);
+    wrap.style.transition = 'opacity .25s'; wrap.style.opacity = 0; setTimeout(() => wrap.remove(), 250);
+    choosePerson(b.dataset.p);
+  };
+}
+function choosePerson(pid) {
+  const prev = LS.get('hq.lastStreak.' + pid, 0);
+  S.pid = pid; LS.set('hq.person', pid); S.selDay = today(); S.enter = true; render();
+  const st = personStreak(pid);
+  if (prev >= 2 && st.n === 0) celebrate(() => { sfx.thud(); return modal(`<div class="hero" style="filter:grayscale(1)">🔥</div><h1>Streak lost</h1><p>Your ${prev}-day streak ended. Every champion has restarted. Let’s begin a new one today!</p><p class="small">Tip: grab a 🧊 Streak Freeze in the shop to protect your next one.</p><button class="btn green block" data-close>Start again 💪</button>`); });
+  for (const n of (S.notices || []).filter(n => n.pid === pid)) {
+    celebrate(() => { sfx.pop(); return modal(`<div class="hero">🧊</div><h1>Streak saved!</h1><p>You missed ${n.used === 1 ? 'a day' : n.used + ' days'}, so ${n.used === 1 ? 'a streak freeze was' : n.used + ' streak freezes were'} used. Your 🔥 ${personStreak(pid).n}-day streak is safe!</p><button class="btn primary block" data-close>Phew!</button>`); });
+  }
+  S.notices = (S.notices || []).filter(n => n.pid !== pid);
+  checkBadges(pid);
+}
+function switchSheet() {
+  openSheet(`<h3>Switch person</h3><div class="plist">${S.people.map(p => { const st = personStreak(p.id), pr = dayProgress(p.id, today());
+    return `<button class="prow ${p.id === S.pid ? 'on' : ''}" data-p="${p.id}">${avatar(p.id, 'md')}<span class="grow"><b>${esc(p.name)}</b><span class="small muted">Lv ${levelOf(tot(p.id).xp)} · 🔥 ${st.n} · ${pr.done}/${pr.total} today</span></span><span class="pill">💎 ${fmt(tot(p.id).gems)}</span></button>`; }).join('')}
+    <button class="prow" data-add><span class="av md" style="--c:#1d2940;border:2px dashed #3b4a6b;color:var(--muted)">＋</span><span class="grow"><b>Add family member</b></span></button></div>`,
+    (sheet, close) => {
+      sheet.onclick = e => {
+        const b = e.target.closest('button'); if (!b) return;
+        if (b.hasAttribute('data-add')) { close(); return addPersonSheet(); }
+        close(); sfx.pop(); if (b.dataset.p !== S.pid) { shown['n-gems'] = undefined; delete shown['n-gems']; choosePerson(b.dataset.p); }
+      };
+    });
+}
+function addPersonSheet() {
+  let color = COLORS[2];
+  openSheet(`<h3>Add family member</h3>
+    <input id="p-name" maxlength="40" placeholder="Name">
+    <span class="lbl">Colour</span><div class="swatches" id="p-sw">${COLORS.map(c => `<button class="sw ${c === color ? 'on' : ''}" style="--c:${c}" data-color="${c}"></button>`).join('')}</div>
+    <p class="small muted" style="margin-top:14px">${S.api === Demo ? 'Demo only.' : 'They’ll also appear on The Board.'}</p>
+    <button class="btn green block" id="p-save" style="margin-top:8px">Add</button>`,
+    (sheet, close) => {
+      sheet.querySelector('#p-sw').onclick = e => { const b = e.target.closest('[data-color]'); if (!b) return; color = b.dataset.color; sheet.querySelectorAll('.sw').forEach(s => s.classList.toggle('on', s === b)); };
+      sheet.querySelector('#p-save').onclick = async () => {
+        const name = sheet.querySelector('#p-name').value.trim(); if (!name) return;
+        try {
+          const p = await S.api.addPerson(name.slice(0, 40), color);
+          S.people.push({ ...p, color: safeColor(p.color) }); close();
+          document.querySelector('.who')?.remove();
+          toast('🎉', `Welcome, <b>${esc(name)}</b>!`); choosePerson(p.id);
+        } catch (e) { saveFailed(e); }
+      };
+    });
+}
+
+// ================= shop =================
+async function buy(kind, id) {
+  const pid = S.pid, own = ownedItems(pid), pr = { ...prof(pid) };
+  const list = kind === 'avatar' ? SHOP.avatars : kind === 'frame' ? SHOP.frames : SHOP.confetti;
+  const it = list.find(x => x.id === id); if (!it) return;
+  if (!own.has(id)) {
+    if (tot(pid).gems < it.p) { sfx.undo(); toast('💎', `You need ${it.p - tot(pid).gems} more gems. Keep going!`); return; }
+    const preview = kind === 'avatar' ? it.e : kind === 'frame' ? `<span class="av lg f-${esc(it.id)} emo" style="--c:${person(pid)?.color}">${esc(pr.avatar || '🙂')}</span>` : it.e;
+    const ok = await modal(`<div class="hero">${preview}</div><h1>${esc(it.n || 'New avatar')}</h1><p>Buy this for <b style="color:var(--gem)">💎 ${it.p}</b>?</p><div style="display:flex;gap:10px"><button class="btn block" data-close>Not now</button><button class="btn primary block" data-close="y">Buy</button></div>`);
+    if (ok !== 'y') return;
+    if (!await award(pid, 'buy:' + id, 'buy', -it.p, 0, { item: id })) return;
+    sfx.coin(); sfx.fanfare(); confetti(pid, false); toast('🛍️', 'Purchased!');
+    await checkBadges(pid);
+  }
+  if (kind === 'avatar') pr.avatar = it.e; else if (kind === 'frame') pr.frame = id; else { pr.confetti = id; setTimeout(() => confetti(pid, false), 150); }
+  S.profiles[pid] = pr; render();
+  S.api.saveProfile({ person_id: pid, avatar: pr.avatar, frame: pr.frame, confetti: pr.confetti }).catch(saveFailed);
+}
+async function buyFreeze() {
+  const pid = S.pid, t = tot(pid);
+  if (t.freezes >= MAX_FREEZES || t.gems < FREEZE_PRICE) return;
+  if (await award(pid, 'buy:freeze:' + uuid(), 'buy', -FREEZE_PRICE, 0, { item: 'freeze', freezes: 1 })) {
+    sfx.coin(); buzz(15); toast('🧊', 'Streak freeze equipped! Your streak is protected.'); await checkBadges(pid); render();
+  }
+}
+
+// ================= events =================
+document.addEventListener('click', async e => {
+  const el = e.target.closest('button, [data-edit], [data-person]'); if (!el || el.closest('.sheet, .modal, .who')) return;
+  ac();   // unlock audio on first tap (iOS)
+  const d = el.dataset;
+  if (d.tab) { if (d.tab !== S.tab) { S.tab = d.tab; S.reorder = false; S.enter = true; if (d.tab === 'today') S.selDay = today(); render(); scrollTo(0, 0); buzz(5); } return; }
+  if (d.day) { if (d.day > today()) { toast('🔮', 'No peeking into the future!'); return; } S.selDay = d.day; render(); return; }
+  if (d.check) {
+    const h = S.habitById.get(d.check), c = logCount(h.id, S.selDay);
+    if (h.target === 1) return setCount(h, S.selDay, c ? 0 : 1, el);
+    if (c >= h.target) { el.closest('.habit').classList.add('wiggle'); setTimeout(() => el.closest('.habit')?.classList.remove('wiggle'), 400); toast('✅', 'Done for today! Tap − to undo one.'); return; }
+    return setCount(h, S.selDay, c + 1, el);
+  }
+  if (d.minus) { const h = S.habitById.get(d.minus); return setCount(h, S.selDay, Math.max(0, logCount(h.id, S.selDay) - 1), el); }
+  if (d.move) { const [hid, dir] = d.move.split(':'); return moveHabit(hid, +dir); }
+  if (d.edit && !S.reorder) return habitForm(S.habitById.get(d.edit));
+  if (d.person) { if (d.person !== S.pid) { delete shown['n-gems']; choosePerson(d.person); } return; }
+  if (d.buy) { const [k, id] = d.buy.split(':'); return buy(k, id); }
+  if (d.badge) { const b = BADGES.find(x => x.id === d.badge), got = hasKey(S.pid, 'badge:' + b.id); return modal(`<div class="hero" style="${got ? '' : 'filter:grayscale(1) brightness(.6)'}">${b.e}</div><h1>${esc(b.n)}</h1><p>${esc(b.d)}</p><div class="reward">${got ? '✓ Earned' : 'Reward'} · ${b.g} 💎</div><br><button class="btn block" data-close>Close</button>`); }
+  switch (d.act) {
+    case 'switch': return switchSheet();
+    case 'reorder': S.reorder = !S.reorder; buzz(5); render(); return;
+    case 'new-habit': return habitForm(null);
+    case 'chest': return openChest();
+    case 'buy-freeze': return buyFreeze();
+    case 'add-person': return addPersonSheet();
+    case 'sound': LS.set('hq.sound', !soundOn()); render(); if (soundOn()) sfx.coin(); return;
+    case 'refresh': await refresh(true); toast('🔄', 'Up to date'); return;
+    case 'signout':
+      if (S.api === Demo) { LS.del('hq.mode'); LS.del('hq.person'); location.reload(); return; }
+      await S.api.signOut(); LS.del('hq.person'); location.reload(); return;
+  }
+});
+
+// ================= boot / auth =================
+function screen(html) { $('#app').innerHTML = `<div class="center">${html}</div>`; }
+function loginScreen(err = '') {
+  screen(`<div class="logo">💎</div><h1 class="brand">Habit Quest</h1>
+    <p class="muted" style="text-align:center;margin:0 0 10px">Build habits together. Earn gems. Keep the streak alive. 🔥</p>
+    ${err ? `<div class="err-box">${esc(err)}</div>` : ''}
+    <form id="login" style="display:flex;flex-direction:column;gap:10px">
+      <input id="email" type="email" autocomplete="username" placeholder="Email (your Board login)" required>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="Password" required>
+      <button class="btn primary block" type="submit">Sign in</button>
+    </form>
+    <p class="small muted" style="text-align:center;margin:4px 0">Use the same email and password as The Board. Kids can use a parent’s login on their device, then pick their own profile.</p>
+    <button class="btn block" id="demo">🎮 Try the demo first</button>`);
+  if (!sb) $('#login').insertAdjacentHTML('beforebegin', '<div class="err-box">Couldn’t load the sign-in library. Check your connection and reload.</div>');
+  $('#login').onsubmit = async e => {
+    e.preventDefault(); if (!sb) return;
+    const btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = 'Signing in…';
+    try { await Remote.signIn($('#email').value.trim(), $('#pw').value); LS.del('hq.mode'); S.api = Remote; start(); }
+    catch (er) { loginScreen(er.message || 'Sign-in failed'); }
+  };
+  $('#demo').onclick = () => { LS.set('hq.mode', 'demo'); S.api = Demo; start(); };
+}
+async function refresh(quiet) {
+  const d = await S.api.load(addDays(today(), -HISTORY_DAYS), addDays(today(), -14));
+  if (d.signedOut) return loginScreen();
+  ingest(d);
+  if (!person(S.pid)) S.pid = null;
+  if (S.pid) { if (S.selDay > today()) S.selDay = today(); render(); }
+  return d;
+}
+async function start() {
+  screen(`<div class="logo">💎</div><div class="spinner"></div><p class="muted" style="text-align:center">Loading your quest…</p>`);
+  let d;
+  try { d = await S.api.load(addDays(today(), -HISTORY_DAYS), addDays(today(), -14)); }
+  catch (e) {
+    console.error(e);
+    if (tableMissing(e)) return screen(`<div class="logo">🛠️</div><h1 class="brand" style="font-size:26px">One-time setup needed</h1><p class="muted" style="text-align:center">The database doesn’t have Habit Quest’s tables yet. Run <b>setup-habit-quest.sql</b> in Supabase → SQL Editor, then reload this page.</p><button class="btn primary block" onclick="location.reload()">Reload</button>`);
+    return screen(`<div class="logo">😵</div><div class="err-box">Couldn’t load: ${esc(e.message || e)}</div><button class="btn primary block" onclick="location.reload()">Try again</button><button class="btn block" id="so">Sign out</button>`), ($('#so').onclick = async () => { await S.api.signOut(); LS.del('hq.mode'); location.reload(); });
+  }
+  if (d.signedOut) return loginScreen();
+  if (d.noHousehold) return screen(`<div class="logo">🏠</div><p style="text-align:center">This login isn’t part of a family yet. Open <b>The Board</b>, create or join your household there, then come back.</p><button class="btn block" onclick="location.reload()">Reload</button>`);
+  ingest(d);
+  S.notices = await applyFreezes();
+  if (!S.people.length) { screen(`<div class="logo">👋</div><h1 class="brand" style="font-size:26px">Add your family</h1><p class="muted" style="text-align:center">Start by adding the first person.</p><button class="btn green block" id="ap">Add family member</button>`); $('#ap').onclick = addPersonSheet; return; }
+  const saved = LS.get('hq.person', null);   // this device remembers who was playing
+  if (saved && person(saved)) choosePerson(saved);
+  else whoIsPlaying();
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && S.pid && Date.now() - S.loadedAt > 60000) refresh(true).catch(console.error);
+});
+// pull-to-refresh-ish: a new day while the app is left open
+setInterval(() => { if (S.pid && S.selDay !== today() && S.tab === 'today' && document.visibilityState === 'visible' && Date.now() - S.loadedAt > 3600000) refresh(true).catch(console.error); }, 60000);
+
+(async function boot() {
+  if (LS.get('hq.mode', null) === 'demo') { S.api = Demo; return start(); }
+  if (!sb) return loginScreen();
+  S.api = Remote;
+  try { if (await Remote.session()) return start(); } catch (e) { console.error(e); }
+  loginScreen();
+})();
+
+})();
+</script>
+</body>
+</html>
