@@ -2,6 +2,8 @@
 
 A family habit tracker with game mechanics: streaks, XP, gems, badges and a weekly family league.
 
+**Live:** https://habit-quest-web.netlify.app (sign-in required)
+
 ![Habit Quest screenshots](docs/screenshot.jpg)
 
 ## Features
