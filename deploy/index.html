@@ -1068,7 +1068,7 @@ const VIEWS = {
       <h2>Avatars</h2>
       <div class="grid3">${SHOP.avatars.map(a => item(a, 'avatar', a.e)).join('')}</div>
       <h2>Avatar frames</h2>
-      <div class="grid3">${SHOP.frames.map(f => item(f, 'frame', `<span class="av ${f.id !== 'none' ? 'f-' + f.id : ''} emo" style="--c:${person(pid)?.color}">${esc(pr.avatar || '🙂')}</span>`, f.n)).join('')}</div>
+      <div class="grid3">${SHOP.frames.map(f => item(f, 'frame', `<span class="av ${f.id !== 'none' ? 'f-' + f.id : ''} emo" style="--c:${safeColor(person(pid)?.color)}">${esc(pr.avatar || '🙂')}</span>`, f.n)).join('')}</div>
       <h2>Celebrations</h2>
       <div class="grid3">${SHOP.confetti.map(c => item(c, 'confetti', c.e, c.n)).join('')}</div>
       <p class="small muted" style="text-align:center;margin-top:18px">Earn gems by finishing habits, perfect days, chests, streaks and badges.</p>
@@ -1565,7 +1565,7 @@ async function buy(kind, id) {
   const it = list.find(x => x.id === id); if (!it) return;
   if (!own.has(id)) {
     if (tot(pid).gems < it.p) { sfx.undo(); toast('💎', `You need ${it.p - tot(pid).gems} more gems. Keep going!`); return; }
-    const preview = kind === 'avatar' ? it.e : kind === 'frame' ? `<span class="av lg f-${esc(it.id)} emo" style="--c:${person(pid)?.color}">${esc(pr.avatar || '🙂')}</span>` : it.e;
+    const preview = kind === 'avatar' ? it.e : kind === 'frame' ? `<span class="av lg f-${esc(it.id)} emo" style="--c:${safeColor(person(pid)?.color)}">${esc(pr.avatar || '🙂')}</span>` : it.e;
     const ok = await modal(`<div class="hero">${preview}</div><h1>${esc(it.n || 'New avatar')}</h1><p>Buy this for <b style="color:var(--gem)">💎 ${it.p}</b>?</p><div style="display:flex;gap:10px"><button class="btn block" data-close>Not now</button><button class="btn primary block" data-close="y">Buy</button></div>`);
     if (ok !== 'y') return;
     if (!await award(pid, 'buy:' + id, 'buy', -it.p, 0, { item: id })) return;
